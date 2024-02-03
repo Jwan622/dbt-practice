@@ -1,12 +1,75 @@
 # Notes I kept while developing the models
-These are questions I need to answer for myself that came up over the course of development.
+
+These are notes I took for myself while writing the models. Also, I left some questions I need to answer for myself that came up over the course of development of the dbt models
 
 ## Ticket Sales models
-- make sure `ROWS BETWEEN 6 PRECEDING AND CURRENT ROW` is what I want there for prior 7 days
 - What's the diff between extract and date_trunc functions for getting the day. Which do I want and why.
 
-
 ### Results for Ticket Sales Query
+
+It seemed odd to me that the daily total tickets increased over time which made me believe I was accidentally aggregating instead of just counting tickets day by day... but it seems to checkout when I run simple where queries. Below are the results for day 2 and 3:
+
+```postgresql
+bookings=# select * from bookings where DATE_TRUNC('day',book_date) = '2017-04-22'
+;
+-[ RECORD 1 ]+-----------------------
+book_ref     | 0D7742
+book_date    | 2017-04-22 18:55:00+00
+total_amount | 120600.00
+-[ RECORD 2 ]+-----------------------
+book_ref     | 41A916
+book_date    | 2017-04-22 11:45:00+00
+total_amount | 19600.00
+-[ RECORD 3 ]+-----------------------
+book_ref     | AAD5A0
+book_date    | 2017-04-22 22:21:00+00
+total_amount | 23200.00
+-[ RECORD 4 ]+-----------------------
+book_ref     | D0E1DA
+book_date    | 2017-04-22 06:01:00+00
+total_amount | 63300.00
+
+bookings=# select * from bookings where DATE_TRUNC('day',book_date) = '2017-04-23'
+;
+-[ RECORD 1 ]+-----------------------
+book_ref     | 168C11
+book_date    | 2017-04-23 23:25:00+00
+total_amount | 31800.00
+-[ RECORD 2 ]+-----------------------
+book_ref     | 1C1D18
+book_date    | 2017-04-23 02:13:00+00
+total_amount | 24800.00
+-[ RECORD 3 ]+-----------------------
+book_ref     | 2711BF
+book_date    | 2017-04-23 00:09:00+00
+total_amount | 59300.00
+-[ RECORD 4 ]+-----------------------
+book_ref     | 2C09A1
+book_date    | 2017-04-23 10:12:00+00
+total_amount | 28400.00
+-[ RECORD 5 ]+-----------------------
+book_ref     | 4BA14C
+book_date    | 2017-04-23 09:48:00+00
+total_amount | 31600.00
+-[ RECORD 6 ]+-----------------------
+book_ref     | BAE0C8
+book_date    | 2017-04-23 23:23:00+00
+total_amount | 81700.00
+-[ RECORD 7 ]+-----------------------
+book_ref     | DCEF58
+book_date    | 2017-04-23 13:47:00+00
+total_amount | 56900.00
+-[ RECORD 8 ]+-----------------------
+book_ref     | F9909D
+book_date    | 2017-04-23 04:29:00+00
+total_amount | 40300.00
+-[ RECORD 9 ]+-----------------------
+book_ref     | FF1CEF
+book_date    | 2017-04-23 01:56:00+00
+total_amount | 26800.00
+```
+
+So I think the results from my model make sense:
 
 ```postgresql
 -[ RECORD 1 ]---------+-----------------------
@@ -76,8 +139,10 @@ I see this:
 | 3700.00      |
 | ... |
 
-so it seems like different airlines have different ways of implying redemptions.
+so it seems like different airlines have different ways of implying redemptions. The first 3 look like dummy values an airline uses to signify a redemption.
 
+
+**Question for myself**:
 1. But wait, do those `total_amounts` correspond to different airlines? If all 3 of the weird numbers (-12345678.00, -1.00, 0.00) correspond to different airlines then I'm confident that's how each airline handles free redemptions. But what if -1.00 and 0.00 are from the same airline? Then they probably mean something different and one of those numbers isn't associated with a redemption. But oddly... I can't seem to find airline in the data! 
 
 So our schema again:
@@ -104,14 +169,9 @@ ON ac.aircraft_code = f.aircraft_code
 WHERE total_amount = 0 or total_amount = -1 or total_amount = -12345678.00
 limit 5;
 ```
-result in expanded move (type `\x` to see output):
+The results in expanded mode (type `\x` to see output):
 
 ```
-bookings=# select DISTINCT ON (total_amount) total_amount, *
-from bookings as b
-INNER JOIN tickets as t
-ON t.book_ref = b.book_ref
-INNER JOIN boarding_passes as bp
 -[ RECORD 1 ]-------+------------------------------------------------------------------------
 total_amount        | -12345678.00
 book_ref            | 00F7B1
@@ -196,7 +256,7 @@ range               | 7900
 (END)
 ```
 
-**Quick eyeball check**: By eyeballing this data, it seems like nothing in common and so I assume those 3 `total_amounts` are from different airlines meaning the odd numbers (0, -1, and -12345678.00) are indeed redemptions. So we can write this as our query:
+**Quick eyeball check**: By eyeballing this data, it seems like nothing in common and so I assume those 3 `total_amounts` are from different airlines meaning the odd numbers (0, -1, and -12345678.00) are indeed redemptions. So we can write this as our query to find redemptions:
 
 ```postgresql
     SELECT
