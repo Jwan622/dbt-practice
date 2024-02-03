@@ -273,8 +273,254 @@ range               | 7900
 
 ## Valid and bookable routes
 
-To get the "max 1 transfer requirement", we self-join to routes.
+Harder problem here.
 
-We start by selecting data from the flights table as f1, representing the first flight in a potential route.
+### The routes view
+First let's try to understand the routes view query a bit better in the postgres dump file.
 
-We then join the flights table again as f2, representing the second flight in the route. We join these flights based on the condition that the arrival airport of the first flight (f1.arrival_airport) should match the departure airport of the second flight (f2.departure_airport).
+This is f2, a subquery.
+```postgresql
+SELECT f1.flight_no,
+    f1.departure_airport,
+    f1.arrival_airport,
+    f1.aircraft_code,
+    f1.duration,
+    f1.scheduled_departure,
+    f1.scheduled_arrival,
+    f1.days_of_week
+    FROM ( SELECT flights.flight_no,
+            flights.departure_airport,
+            flights.arrival_airport,
+            flights.aircraft_code,
+            flights.scheduled_arrival::TIME AS scheduled_arrival,
+            flights.scheduled_departure::TIME AS scheduled_departure,
+            (flights.scheduled_arrival - flights.scheduled_departure) AS duration,
+            (to_char(flights.scheduled_departure, 'ID'::text))::integer AS days_of_week
+           FROM flights) f1
+GROUP BY f1.flight_no, f1.departure_airport, f1.arrival_airport, f1.aircraft_code, f1.duration, f1.days_of_week, f1.scheduled_departure, f1.scheduled_arrival
+ORDER BY f1.flight_no, f1.departure_airport, f1.arrival_airport, f1.aircraft_code, f1.duration, f1.days_of_week, f1.scheduled_departure, f1.scheduled_arrival
+```
+
+The results look like this:
+
+```postgresql
+flight_no | departure_airport | arrival_airport | aircraft_code | duration | scheduled_departure | scheduled_arrival | days_of_week
+-----------+-------------------+-----------------+---------------+----------+---------------------+-------------------+--------------
+ PG0001    | UIK               | SGC             | CR2           | 02:20:00 | 12:15:00            | 14:35:00          |            6
+ PG0002    | SGC               | UIK             | CR2           | 02:20:00 | 07:10:00            | 09:30:00          |            7
+ PG0003    | IWA               | AER             | CR2           | 02:10:00 | 06:50:00            | 09:00:00          |            2
+ PG0003    | IWA               | AER             | CR2           | 02:10:00 | 06:50:00            | 09:00:00          |            6
+ PG0004    | AER               | IWA             | CR2           | 02:10:00 | 09:45:00            | 11:55:00          |            3
+ PG0004    | AER               | IWA             | CR2           | 02:10:00 | 09:45:00            | 11:55:00          |            7
+ PG0005    | DME               | PKV             | CN1           | 02:05:00 | 12:40:00            | 14:45:00          |            2
+ PG0005    | DME               | PKV             | CN1           | 02:05:00 | 12:40:00            | 14:45:00          |            5
+ PG0005    | DME               | PKV             | CN1           | 02:05:00 | 12:40:00            | 14:45:00          |            7
+ PG0006    | PKV               | DME             | CN1           | 02:05:00 | 14:20:00            | 16:25:00          |            1
+```
+
+And then finally f3 array_aggs the days of the week together. Notice it does not `GROUP BY` the days of the week column so that `array_agg` function can aggregate the days of the week the routes fly.
+
+https://www.postgresqltutorial.com/postgresql-aggregate-functions/postgresql-array_agg/
+
+This is f3:
+```postgresql
+WITH f3 AS (
+    SELECT f2.flight_no,
+        f2.departure_airport,
+        f2.arrival_airport,
+        f2.aircraft_code,
+        f2.duration,
+        f2.scheduled_departure,
+        f2.scheduled_arrival,
+        array_agg(f2.days_of_week) AS days_of_week
+    FROM ( SELECT f1.flight_no,
+            f1.departure_airport,
+            f1.arrival_airport,
+            f1.aircraft_code,
+            f1.duration,
+            f1.scheduled_departure,
+            f1.scheduled_arrival,
+            f1.days_of_week
+           FROM ( SELECT flights.flight_no,
+                    flights.departure_airport,
+                    flights.arrival_airport,
+                    flights.aircraft_code,
+                    flights.scheduled_arrival::TIME AS scheduled_arrival,
+                    flights.scheduled_departure::TIME AS scheduled_departure,
+                    (flights.scheduled_arrival - flights.scheduled_departure) AS duration,
+                    (to_char(flights.scheduled_departure, 'ID'::text))::integer AS days_of_week
+                   FROM flights) f1
+          GROUP BY f1.flight_no, f1.departure_airport, f1.arrival_airport, f1.aircraft_code, f1.duration, f1.days_of_week, f1.scheduled_departure, f1.scheduled_arrival
+          ORDER BY f1.flight_no, f1.departure_airport, f1.arrival_airport, f1.aircraft_code, f1.duration, f1.days_of_week, f1.scheduled_departure, f1.scheduled_arrival) f2
+    GROUP BY f2.flight_no, f2.departure_airport, f2.arrival_airport, f2.aircraft_code, f2.duration, f2.scheduled_departure, f2.scheduled_arrival
+)
+```
+
+the view is hydrated with airport data like airport_name and the city of the airport using the `airport_code` to join.
+
+### Questions
+Quite a few questions and slight gotchas came up on this. I'll tackle one at a time.
+
+We had a few problems defining a valid route. 
+
+____
+First the issue of **max** one transfer. My approach was to join on routes twice so we can check if the 2nd transfer is NULL. I did something like this:
+
+```postgresql
+SELECT
+    route1.flight_no AS first_flight,
+    route2.flight_no AS second_flight,
+    route3.flight_no as third_flight
+FROM routes AS route1
+LEFT OUTER JOIN routes AS route2
+ON route1.arrival_airport = route2.departure_airport
+AND route1.departure_airport <> route2.arrival_airport  -- non-circular
+LEFT OUTER JOIN routes AS route3
+ON route2.arrival_airport = route3.departure_airport
+AND route3.flight_no IS NULL
+```
+
+results:
+
+```postgresql
+first_flight | second_flight | third_flight
+--------------+---------------+--------------
+ PG0348       | PG0448        |
+ PG0107       | PG0448        |
+ PG0127       | PG0448        |
+ PG0230       | PG0448        |
+ PG0359       | PG0448        |
+ PG0443       | PG0448        |
+ PG0237       | PG0448        |
+```
+
+which means to me some of the route2.arrival_airports are dead ends.
+
+If we change the query slightly to see 2 transfer routes:
+
+```postgresql
+SELECT
+    route1.flight_no AS first_flight,
+    route2.flight_no AS second_flight,
+    route3.flight_no as third_flight
+FROM routes AS route1
+LEFT OUTER JOIN routes AS route2
+ON route1.arrival_airport = route2.departure_airport
+AND route1.departure_airport <> route2.arrival_airport  -- non-circular
+LEFT OUTER JOIN routes AS route3
+ON route2.arrival_airport = route3.departure_airport
+AND route3.flight_no IS NOT NULL
+```
+
+we see this:
+
+```postgresql
+ first_flight | second_flight | third_flight
+--------------+---------------+--------------
+ PG0448       | PG0092        | PG0091
+ PG0448       | PG0092        | PG0331
+ PG0448       | PG0092        | PG0433
+ PG0448       | PG0092        | PG0324
+ PG0448       | PG0067        | PG0456
+ PG0448       | PG0067        | PG0667
+ PG0448       | PG0067        | PG0637
+ PG0448       | PG0067        | PG0317
+ PG0448       | PG0067        | PG0547
+ PG0448       | PG0067        | PG0178
+ PG0448       | PG0067        | PG0093
+ PG0448       | PG0067        | PG0663
+ PG0448       | PG0067        | PG0152
+ PG0448       | PG0067        | PG0470
+```
+
+So we need to filter 2 transfer routes out. We do this in the top CTE `max_1_transfer_flights`.
+
+____
+So I know the `README.md` says "A bookable route cannot start and end at the same airport." but does this mean routes with a transfer or for a single leg? Do single leg routes that start and end in a single airport even exist? Do routes with a transfer that start and end at the same airport count as a valid because they stopped somewhere else in the middle? Let's check:
+
+So the below is a query for single-leg (non-transfer) routes that start and end at the same place.
+
+```postgresql
+select count(1) from routes where arrival_airport = departure_airport;
+```
+
+result:
+
+```postgresql
+count
+-------
+     0
+(1 row)
+```
+Since there are none, I think that requirement actually refers to routes with a transfer that start and end at the same airport. I think that's not a valid route. Let's see how many of those exist.
+
+```postgresql
+WITH circular_flights AS (
+  SELECT
+    route1.flight_no AS first_flight,
+    route2.flight_no AS second_flight,
+    route1.departure_airport AS first_departure_airport,
+    route2.arrival_airport AS second_arrival_airport,
+    route1.scheduled_departure as first_scheduled_departure_time,
+    route2.scheduled_departure as second_scheduled_departure_time,
+    route1.scheduled_arrival as first_scheduled_arrival_time,
+    route2.scheduled_arrival as second_scheduled_arrival_time,
+    CASE
+        WHEN route1.arrival_airport = route2.departure_airport THEN 1
+        ELSE 0
+    END as sanity_check_for_transfer,
+    CASE
+        WHEN route2.flight_no IS NULL THEN 1
+        ELSE 0
+    END AS is_transfer
+  FROM routes AS route1
+  LEFT OUTER JOIN routes AS route2
+  ON route1.arrival_airport = route2.departure_airport
+  AND route1.departure_airport = route2.arrival_airport  -- circular
+) select count(1) from circular_flights;
+ count
+-------
+   946
+(1 row)
+```
+
+
+query for non-circular flights:
+
+```postgresql
+WITH non_circular_flights AS (
+  SELECT
+    route1.flight_no AS first_flight,
+    route2.flight_no AS second_flight,
+    route1.departure_airport AS first_departure_airport,
+    route2.arrival_airport AS second_arrival_airport,
+    route1.scheduled_departure as first_scheduled_departure_time,
+    route2.scheduled_departure as second_scheduled_departure_time,
+    route1.scheduled_arrival as first_scheduled_arrival_time,
+    route2.scheduled_arrival as second_scheduled_arrival_time,
+    CASE
+        WHEN route1.arrival_airport = route2.departure_airport THEN 1
+        ELSE 0
+    END as sanity_check_for_transfer,
+    CASE
+        WHEN route2.flight_no IS NULL THEN 1
+        ELSE 0
+    END AS is_transfer
+  FROM routes AS route1
+  LEFT OUTER JOIN routes AS route2
+  ON route1.arrival_airport = route2.departure_airport
+  AND route1.departure_airport <> route2.arrival_airport  -- non-circular
+) select count(1) from non_circular_flights
+
+count
+-------
+ 12459
+(1 row)
+```
+
+To get the "max 1 transfer requirement", we self-join (left outer join) to routes again and take the rows where the right side is null. 
+
+___
+
+2. What is a route? I think it just means "a possible way of travel" which is why the timestamps don't really matter here. All a route is is a series of flights that can be taken because you are at the airport where a flight ends and another begins.
+__
