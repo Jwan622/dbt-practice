@@ -64,10 +64,10 @@ max_1_transfer_and_non_circular_flights_within_24h AS (
     first_flight as first_flight_no,
     second_flight as second_flight_no,
     first_departure_airport as origin_airport,
-    first_scheduled_departure_time as first_scheduled_departure_time,
     COALESCE(second_arrival_airport, first_arrival_airport) as destination_airport_code,
-    COALESCE(second_scheduled_arrival_time, first_scheduled_arrival_time) as destination_arrival_time,
-    CASE WHEN is_transfer = 1 THEN first_arrival_airport END as transfer_airport_code,
-    CASE WHEN is_transfer = 1 THEN first_scheduled_arrival_time END as transfer_airport_arrival_time,
-    CASE WHEN is_transfer = 1 THEN second_scheduled_departure_time END as transfer_airport_departure_time
+    CASE WHEN second_flight IS NOT NULL THEN first_arrival_airport END as transfer_airport_code,
+    first_scheduled_departure_time as first_scheduled_departure_time,
+    CASE WHEN second_flight IS NOT NULL THEN first_scheduled_arrival_time END as transfer_airport_arrival_time,
+    CASE WHEN second_flight IS NOT NULL THEN second_scheduled_departure_time END as transfer_airport_departure_time,
+    COALESCE(second_scheduled_arrival_time, first_scheduled_arrival_time) as destination_arrival_time
 FROM max_1_transfer_and_non_circular_flights_within_24h AS valid_routes
