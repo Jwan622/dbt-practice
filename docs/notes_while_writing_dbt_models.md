@@ -76,6 +76,136 @@ I see this:
 | 3700.00      |
 | ... |
 
-and so to me, different airlines have different ways of implying redemptions.
+so it seems like different airlines have different ways of implying redemptions.
 
-1. But wait, do those `total_amounts` correspond to different airlines? If not, that's an issue. Usually airlines, I'd assume, have a single way of identifying a free redemption. So let's see what airline or flight company those amounts are associated with?
+1. But wait, do those `total_amounts` correspond to different airlines? If all 3 of the weird numbers (-12345678.00, -1.00, 0.00) correspond to different airlines then I'm confident that's how each airline handles free redemptions. But what if -1.00 and 0.00 are from the same airline? Then they probably mean something different and one of those numbers isn't associated with a redemption. But oddly... I can't seem to find airline in the data! 
+
+So our schema again:
+```
+bookings -> tickets via `book_ref` foreign key
+tickets -> boarding_passes via `ticket_no` foreign key
+boarding_passes -> flights via `flight_id` foreign key
+flights -> airports_data vua `airport_code` foreign key
+```
+
+So given our schema, let's run:
+
+```
+select DISTINCT ON (total_amount) total_amount, *
+from bookings as b
+INNER JOIN tickets as t
+ON t.book_ref = b.book_ref
+INNER JOIN boarding_passes as bp
+ON bp.ticket_no = t.ticket_no
+INNER JOIN flights as f
+ON bp.flight_id = f.flight_id
+INNER JOIN aircrafts_data as ac
+ON ac.aircraft_code = f.aircraft_code
+WHERE total_amount = 0 or total_amount = -1 or total_amount = -12345678.00
+limit 5;
+```
+result in expanded move (type `\x` to see output):
+
+```
+bookings=# select DISTINCT ON (total_amount) total_amount, *
+from bookings as b
+INNER JOIN tickets as t
+ON t.book_ref = b.book_ref
+INNER JOIN boarding_passes as bp
+-[ RECORD 1 ]-------+------------------------------------------------------------------------
+total_amount        | -12345678.00
+book_ref            | 00F7B1
+book_date           | 2017-06-29 11:04:00+00
+total_amount        | -12345678.00
+ticket_no           | 0005434458539
+book_ref            | 00F7B1
+passenger_id        | 0444 821040
+passenger_name      | MARIYA KUZNECOVA
+contact_data        | {"phone": "+70019954247"}
+ticket_no           | 0005434458539
+flight_id           | 14571
+boarding_no         | 32
+seat_no             | 5C
+flight_id           | 14571
+flight_no           | PG0241
+scheduled_departure | 2017-07-20 06:40:00+00
+scheduled_arrival   | 2017-07-20 07:30:00+00
+departure_airport   | SVO
+arrival_airport     | CSY
+status              | Arrived
+aircraft_code       | SU9
+actual_departure    | 2017-07-20 06:43:00+00
+actual_arrival      | 2017-07-20 07:33:00+00
+aircraft_code       | SU9
+model               | {"en": "Sukhoi Superjet-100", "ru": "Сухой Суперджет-100"}
+range               | 3000
+-[ RECORD 2 ]-------+------------------------------------------------------------------------
+total_amount        | -1.00
+book_ref            | 00FC04
+book_date           | 2017-05-14 21:31:00+00
+total_amount        | -1.00
+ticket_no           | 0005433931255
+book_ref            | 00FC04
+passenger_id        | 8649 813759
+passenger_name      | NIKITA IVANOV
+contact_data        | {"email": "ivanovnikita041966@postgrespro.ru", "phone": "+70023329964"}
+ticket_no           | 0005433931255
+flight_id           | 2986
+boarding_no         | 47
+seat_no             | 15E
+flight_id           | 2986
+flight_no           | PG0210
+scheduled_departure | 2017-06-09 15:00:00+00
+scheduled_arrival   | 2017-06-09 16:50:00+00
+departure_airport   | DME
+arrival_airport     | MRV
+status              | Arrived
+aircraft_code       | 733
+actual_departure    | 2017-06-09 15:02:00+00
+actual_arrival      | 2017-06-09 16:51:00+00
+aircraft_code       | 733
+model               | {"en": "Boeing 737-300", "ru": "Боинг 737-300"}
+range               | 4200
+-[ RECORD 3 ]-------+------------------------------------------------------------------------
+total_amount        | 0.00
+book_ref            | 00C3E6
+book_date           | 2017-06-11 04:59:00+00
+total_amount        | 0.00
+ticket_no           | 0005432140137
+book_ref            | 00C3E6
+passenger_id        | 4265 931290
+passenger_name      | LYUBOV FILIPPOVA
+contact_data        | {"email": "filippova-l_1965@postgrespro.ru", "phone": "+70955130158"}
+ticket_no           | 0005432140137
+flight_id           | 10949
+boarding_no         | 48
+seat_no             | 14A
+flight_id           | 10949
+flight_no           | PG0529
+scheduled_departure | 2017-06-27 06:50:00+00
+scheduled_arrival   | 2017-06-27 08:20:00+00
+departure_airport   | SVO
+arrival_airport     | UFA
+status              | Arrived
+aircraft_code       | 763
+actual_departure    | 2017-06-27 06:51:00+00
+actual_arrival      | 2017-06-27 08:20:00+00
+aircraft_code       | 763
+model               | {"en": "Boeing 767-300", "ru": "Боинг 767-300"}
+range               | 7900
+(END)
+```
+
+**Quick eyeball check**: By eyeballing this data, it seems like nothing in common and so I assume those 3 `total_amounts` are from different airlines meaning the odd numbers (0, -1, and -12345678.00) are indeed redemptions. So we can write this as our query:
+
+```postgresql
+    SELECT
+        DATE_TRUNC('day', b.book_date) AS date,
+        COUNT(*) AS redemption_count
+    FROM bookings b
+    WHERE total_amount = -1 
+        OR total_amount = 0 
+        OR total_amount = -12345678.00
+    GROUP BY date
+    ORDER BY redemption_count desc
+```
