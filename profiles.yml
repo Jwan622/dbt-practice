@@ -1,0 +1,13 @@
+plaid-de:
+  outputs:
+    dev:
+      dbname: bookings
+      host: localhost
+      password: plaid
+      port: 5438
+      schema: dbt
+      threads: 4
+      timeout_seconds: 300
+      type: postgres
+      user: postgres
+  target: dev
