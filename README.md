@@ -41,7 +41,7 @@ docker run --name plaid-assessment --detach --publish 5438:5432 plaid-assessment
         - Valid routes are defined by flights that can be completed within 24 hours, with a maximum of 1 transfer. A bookable route cannot start and end at the same airport.
         - This table should include the following:
           - Origin airport code and departure time
-          - Destination airport code and and arrival time
+          - Destination airport code and arrival time
           - Transfer airport code, if any, departure time, and arrival time
           - Flight numbers of each flight
         - Use `bookings.routes` instead of `bookings.flights` for your model, as `bookings.flights` is a fact table containing historical information.

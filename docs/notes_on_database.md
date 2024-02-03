@@ -1,4 +1,4 @@
-# Notes
+# Notes on the database
 
 Just some notes while looking over the PostgreSQL dump:
 

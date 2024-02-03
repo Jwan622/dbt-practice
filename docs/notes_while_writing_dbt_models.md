@@ -269,3 +269,12 @@ range               | 7900
     GROUP BY date
     ORDER BY redemption_count desc
 ```
+
+
+## Valid and bookable routes
+
+To get the "max 1 transfer requirement", we self-join to routes.
+
+We start by selecting data from the flights table as f1, representing the first flight in a potential route.
+
+We then join the flights table again as f2, representing the second flight in the route. We join these flights based on the condition that the arrival airport of the first flight (f1.arrival_airport) should match the departure airport of the second flight (f2.departure_airport).
