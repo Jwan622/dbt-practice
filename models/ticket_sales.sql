@@ -1,36 +1,30 @@
 WITH daily_metrics AS (
-  SELECT
-    date_trunc('day', booking_date) AS date,
-    COUNT(*) AS total_tickets_daily
-  FROM bookings
-  GROUP BY date
+    SELECT
+        DATE_TRUNC('day', b.book_date) AS sale_date,
+        COUNT(t.ticket_no) AS total_tickets
+    FROM bookings b
+    JOIN tickets t ON b.book_ref = t.book_ref
+    GROUP BY sale_date
 ),
 
 rolling_7_metrics_from_daily_metrics AS (
-  SELECT
-    date,
-    SUM(total_tickets_daily) OVER (
-      ORDER BY date
-      ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
-    ) AS total_tickets_rolling_7
-  FROM daily_metrics
+    SELECT
+        sale_date,
+        SUM(total_tickets) OVER (ORDER BY sale_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS rolling_7_days_total
+    FROM daily_ticket_sales
 ),
 
 rolling_28_metrics_from_daily_metrics AS (
-  SELECT
-    date,
-    SUM(total_tickets_daily) OVER (
-      ORDER BY date
-      ROWS BETWEEN 27 PRECEDING AND CURRENT ROW
-    ) AS total_tickets_rolling_28
-  FROM daily_metrics
+    SELECT
+        sale_date,
+        SUM(total_tickets) OVER (ORDER BY sale_date ROWS BETWEEN 27 PRECEDING AND CURRENT ROW) AS rolling_28_days_total
+    FROM daily_ticket_sales
 )
-
 SELECT
-  daily_metrics.date,
-  daily_metrics.total_tickets_daily,
-  rolling_7_metrics_from_daily_metrics.total_tickets_rolling_7,
-  rolling_28_metrics_from_daily_metrics.total_tickets_rolling_28
-FROM daily_metrics
-LEFT JOIN rolling_7_metrics_from_daily_metrics ON daily_metrics.date = rolling_7_metrics_from_daily_metrics.date
-LEFT JOIN rolling_28_metrics_from_daily_metrics ON daily_metrics.date = rolling_28_metrics_from_daily_metrics.date;
+    dts.sale_date AS date,
+    dts.total_tickets AS daily_total_tickets,
+    rolling_7d.rolling_7_days_total,
+    rolling_28d.rolling_28_days_total
+FROM daily_ticket_sales dts
+LEFT JOIN rolling_7_day_ticket_sales rolling_7d ON dts.sale_date = rolling_7d.sale_date
+LEFT JOIN rolling_28_day_ticket_sales rolling_28d ON dts.sale_date = rolling_28d.sale_date;
