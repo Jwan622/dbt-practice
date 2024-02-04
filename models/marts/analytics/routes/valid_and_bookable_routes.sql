@@ -98,9 +98,11 @@ max_1_transfer_and_non_circular_flights_with_travel_times AS (
         first_scheduled_departure_time,
         first_scheduled_arrival_time,
         second_scheduled_departure_time,
-        second_scheduled_arrival_time
+        second_scheduled_arrival_time,
+        normalized_first_leg + normalized_second_leg + normalized_third_leg as travel_time
     FROM max_1_transfer_and_non_circular_flights_with_travel_times
     WHERE normalized_first_leg + normalized_second_leg + normalized_third_leg <= INTERVAL '24 HOURS'
+    OR second_flight is null -- I think we still want all of the single leg flights too since they're valid by the README rules
 ) SELECT
     first_flight as first_flight_no,
     second_flight as second_flight_no,
@@ -110,5 +112,6 @@ max_1_transfer_and_non_circular_flights_with_travel_times AS (
     first_scheduled_departure_time as first_scheduled_departure_time,
     CASE WHEN second_flight IS NOT NULL THEN first_scheduled_arrival_time END as transfer_airport_arrival_time,
     CASE WHEN second_flight IS NOT NULL THEN second_scheduled_departure_time END as transfer_airport_departure_time,
-    COALESCE(second_scheduled_arrival_time, first_scheduled_arrival_time) as destination_arrival_time
+    COALESCE(second_scheduled_arrival_time, first_scheduled_arrival_time) as destination_arrival_time,
+    travel_time
 FROM max_1_transfer_and_non_circular_flights_within_24hours AS valid_routes

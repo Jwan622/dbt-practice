@@ -770,8 +770,8 @@ WITH no_transfer_flights AS (
         NULL AS second_departure_airport,
         NULL AS second_arrival_airport,
         route1.scheduled_departure as first_scheduled_departure_time,
-        NULL::time without time zone as second_scheduled_departure_time,
         route1.scheduled_arrival as first_scheduled_arrival_time,
+        NULL::time without time zone as second_scheduled_departure_time,
         NULL::time without time zone as second_scheduled_arrival_time
     FROM jwan.test_routes AS route1
 ),
@@ -784,8 +784,8 @@ one_transfer_flights AS (
         route2.departure_airport AS second_departure_airport,
         route2.arrival_airport AS second_arrival_airport,
         route1.scheduled_departure as first_scheduled_departure_time,
-        route2.scheduled_departure as second_scheduled_departure_time,
         route1.scheduled_arrival as first_scheduled_arrival_time,
+        route2.scheduled_departure as second_scheduled_departure_time,
         route2.scheduled_arrival as second_scheduled_arrival_time
     FROM jwan.test_routes AS route1
     LEFT OUTER JOIN jwan.test_routes AS route2
@@ -800,8 +800,8 @@ max_1_transfer_and_non_circular_flights AS (
     second_departure_airport,
     second_arrival_airport,
     first_scheduled_departure_time,
-    second_scheduled_departure_time,
     first_scheduled_arrival_time,
+    second_scheduled_departure_time,
     second_scheduled_arrival_time
   FROM one_transfer_flights
   WHERE first_departure_airport <> second_arrival_airport -- non-circular
@@ -814,8 +814,8 @@ max_1_transfer_and_non_circular_flights AS (
     second_departure_airport,
     second_arrival_airport,
     first_scheduled_departure_time,
-    second_scheduled_departure_time,
     first_scheduled_arrival_time,
+    second_scheduled_departure_time,
     second_scheduled_arrival_time
   FROM no_transfer_flights
 ),
@@ -858,6 +858,7 @@ max_1_transfer_and_non_circular_flights_with_travel_times AS (
         second_scheduled_arrival_time
     FROM max_1_transfer_and_non_circular_flights_with_travel_times
     WHERE normalized_first_leg + normalized_second_leg + normalized_third_leg <= INTERVAL '24 HOURS'
+    OR second_flight is null
 ) SELECT
     first_flight as first_flight_no,
     second_flight as second_flight_no,
