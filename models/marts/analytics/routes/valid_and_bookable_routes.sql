@@ -1,9 +1,10 @@
+{{
+    config(
+        materialized='table',
+    )
+}}
 
-  create view "bookings"."dbt"."valid_and_bookable_routes__dbt_tmp"
-    
-    
-  as (
-    WITH no_transfer_flights AS (
+WITH no_transfer_flights AS (
     SELECT
         route1.flight_no AS first_flight,
         NULL AS second_flight,
@@ -61,10 +62,45 @@ max_1_transfer_and_non_circular_flights AS (
     second_scheduled_arrival_time
   FROM no_transfer_flights
 ),
-max_1_transfer_and_non_circular_flights_within_24h AS (
-    SELECT *
+max_1_transfer_and_non_circular_flights_with_travel_times AS (
+    SELECT
+        first_flight,
+        second_flight,
+        first_departure_airport,
+        first_arrival_airport,
+        second_departure_airport,
+        second_arrival_airport,
+        first_scheduled_departure_time,
+        first_scheduled_arrival_time,
+        second_scheduled_departure_time,
+        second_scheduled_arrival_time,
+        CASE WHEN first_scheduled_arrival_time - first_scheduled_departure_time < '00:00:00'::INTERVAL
+            THEN first_scheduled_arrival_time - first_scheduled_departure_time + INTERVAL '24 HOURS'
+            ELSE first_scheduled_arrival_time - first_scheduled_departure_time
+        END as normalized_first_leg,
+        CASE WHEN second_scheduled_departure_time - first_scheduled_arrival_time < '00:00:00'::INTERVAL
+            THEN second_scheduled_departure_time - first_scheduled_arrival_time + INTERVAL '24 HOURS'
+            ELSE second_scheduled_departure_time - first_scheduled_arrival_time
+        END as normalized_second_leg,
+        CASE WHEN second_scheduled_arrival_time - second_scheduled_departure_time < '00:00:00'::INTERVAL
+            THEN second_scheduled_arrival_time - second_scheduled_departure_time + INTERVAL '24 HOURS'
+            ELSE second_scheduled_arrival_time - second_scheduled_departure_time
+        END as normalized_third_leg
     FROM max_1_transfer_and_non_circular_flights
-    WHERE first_scheduled_departure_time NOT BETWEEN second_scheduled_departure_time AND second_scheduled_arrival_time  -- since we have no dates, this is a good trick I think to figure out if the flights took more than 24 hours?
+), max_1_transfer_and_non_circular_flights_within_24hours AS (
+    SELECT
+        first_flight,
+        second_flight,
+        first_departure_airport,
+        first_arrival_airport,
+        second_departure_airport,
+        second_arrival_airport,
+        first_scheduled_departure_time,
+        first_scheduled_arrival_time,
+        second_scheduled_departure_time,
+        second_scheduled_arrival_time
+    FROM max_1_transfer_and_non_circular_flights_with_travel_times
+    WHERE normalized_first_leg + normalized_second_leg + normalized_third_leg <= INTERVAL '24 HOURS'
 ) SELECT
     first_flight as first_flight_no,
     second_flight as second_flight_no,
@@ -75,5 +111,4 @@ max_1_transfer_and_non_circular_flights_within_24h AS (
     CASE WHEN second_flight IS NOT NULL THEN first_scheduled_arrival_time END as transfer_airport_arrival_time,
     CASE WHEN second_flight IS NOT NULL THEN second_scheduled_departure_time END as transfer_airport_departure_time,
     COALESCE(second_scheduled_arrival_time, first_scheduled_arrival_time) as destination_arrival_time
-FROM max_1_transfer_and_non_circular_flights_within_24h AS valid_routes
-  );
+FROM max_1_transfer_and_non_circular_flights_within_24hours AS valid_routes

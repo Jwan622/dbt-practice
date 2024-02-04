@@ -1,3 +1,9 @@
+{{
+    config(
+        materialized='table',
+    )
+}}
+
 WITH daily_ticket_sales AS (
     SELECT
         DATE_TRUNC('day', b.book_date) AS sale_date,
