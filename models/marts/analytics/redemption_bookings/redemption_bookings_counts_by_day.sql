@@ -12,4 +12,4 @@ WHERE total_amount = -1
     OR total_amount = 0
     OR total_amount = -12345678.00
 GROUP BY date
-ORDER BY redemption_count desc
+ORDER BY date asc
