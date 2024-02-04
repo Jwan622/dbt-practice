@@ -4,7 +4,7 @@
     )
 }}
 
-WITH cte AS (
+WITH actual_vs_expected_ticket_sales AS (
     SELECT
     tsc.date,
     tsc.rolling_7_days_total AS actual_7d_total,
@@ -24,7 +24,7 @@ SELECT
     expected_7d_total,
     actual_28d_total
     expected_28d_total
-FROM cte
+FROM actual_vs_expected_ticket_sales
 WHERE actual_7d_total <> expected_7d_total
 OR actual_28d_total <> expected_28d_total
 
