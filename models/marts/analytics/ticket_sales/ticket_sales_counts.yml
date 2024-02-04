@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: ticket_sales_counts
+    columns:
+      - name: daily_total_tickets
+        tests:
+          - not_null
+      - name: rolling_7_days_total
+        tests:
+          - not_null
+      - name: rolling_28_days_total
+        tests:
+          - not_null
+      - name: date
+        tests:
+          - not_null
