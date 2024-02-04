@@ -406,13 +406,13 @@ SELECT
 
 results:
 
-```postgresql
+```
 (0 rows)
 ```
 
 Are there any orphan airports?
 
-```postgresql
+```
 SELECT DISTINCT departure_airport
 FROM routes
 WHERE departure_airport NOT IN (SELECT DISTINCT arrival_airport FROM routes)
@@ -428,7 +428,7 @@ Okay so I think I understood the question wrong. The "max" part of that question
 
 I created a test schema named `jwan` and some dummy tables in the schema to play around with so I can be more sure of my queries.
 my test table:
-```postgresql
+```
  flight_no | departure_airport |      departure_airport_name      | departure_city | arrival_airport |       arrival_airport_name       | arrival_city | aircraft_code | scheduled_departure | scheduled_arrival | duration |  days_of_week
 -----------+-------------------+----------------------------------+----------------+-----------------+----------------------------------+--------------+---------------+---------------------+-------------------+----------+-----------------
  PG0001    | UIK               | Ust-Ilimsk Airport               | Ust Ilimsk     | SGC             | Surgut Airport                   | Surgut       | CR2           | 12:15:00            | 14:35:00          | 02:20:00 | {6}
@@ -451,7 +451,7 @@ It has just 10 rows. **But the thing to note here is that PG0007 and PG0008 shar
 But I think these should go away when we account for circular routes.
 
 For 1 transfer routes:
-```postgresql
+```
  SELECT
         route1.flight_no AS first_flight,
         route2.flight_no AS second_flight,
@@ -471,7 +471,7 @@ For 1 transfer routes:
 
 which returned me this:
 
-```postgresql
+```
 first_flight | second_flight | first_departure_airport | first_arrival_airport | second_departure_airport | second_arrival_airport | first_scheduled_departure_time | second_scheduled_departure_time | first_scheduled_arrival_time | second_scheduled_arrival_time
 --------------+---------------+-------------------------+-----------------------+--------------------------+------------------------+--------------------------------+---------------------------------+------------------------------+-------------------------------
  PG0001       | PG0002        | UIK                     | SGC                   | SGC                      | UIK                    | 12:15:00                       | 07:10:00                        | 14:35:00                     | 09:30:00
@@ -498,13 +498,13 @@ So I know the `README.md` says "A bookable route cannot start and end at the sam
 
 So the below is a query for single-leg (non-transfer) routes that start and end at the same place.
 
-```postgresql
+```
 select count(1) from routes where arrival_airport = departure_airport;
 ```
 
 result:
 
-```postgresql
+```
 count
 -------
      0
@@ -514,7 +514,7 @@ Since there are none, I think that requirement actually refers to routes with a 
 
 In order to see if I'm doing this correctly, let's create some data:
 
-```postgresql
+```
 select * from routes where departure_airport = 'GDZ';
 
 flight_no | departure_airport | departure_airport_name | departure_city | arrival_airport |        arrival_airport_name        | arrival_city | aircraft_code | scheduled_departure | scheduled_arrival | duration | days_of_week
@@ -541,12 +541,12 @@ insert into jwan.test_routes select * from routes where departure_airport = 'VKO
 ```
 
 and insert one more departure_airport = 'GDZ' row and a non-circular and circular departure_airport = 'ESL' route and we get:
-```postgresql
+```
 insert into jwan.test_routes select * from routes where departure_airport = 'ESL' and arrival_airport = 'GDZ' limit 1;
 insert into jwan.test_routes select * from routes where departure_airport = 'VKO' and arrival_airport = 'JOK' limit 1;
 ```
 
-```postgresql
+```
  flight_no | departure_airport |    departure_airport_name     | departure_city | arrival_airport |        arrival_airport_name        | arrival_city | aircraft_code | scheduled_departure | scheduled_arrival | duration |  days_of_week
 -----------+-------------------+-------------------------------+----------------+-----------------+------------------------------------+--------------+---------------+---------------------+-------------------+----------+-----------------
  PG0300    | ESL               | Elista Airport                | Elista         | SVO             | Sheremetyevo International Airport | Moscow       | CN1           | 08:20:00            | 12:10:00          | 03:50:00 | {1,2,3,4,5,6,7}
@@ -562,7 +562,7 @@ insert into jwan.test_routes select * from routes where departure_airport = 'VKO
 
 When we run our query we get this which looks right:
 
-```postgresql
+```
 bookings=# WITH no_transfer_flights AS (
     SELECT
  first_flight | second_flight | first_departure_airport | first_arrival_airport | second_departure_airport | second_arrival_airport | first_scheduled_departure_time | second_scheduled_departure_time | first_scheduled_arrival_time | second_scheduled_arrival_time
@@ -586,7 +586,7 @@ Main point of this QA: We'd expect the GDZ -> VKO -> GDZ route to **not** be inc
 
 ### Our final test sql code against our schema
 
-```postgresql
+```
 WITH no_transfer_flights AS (
     SELECT
         route1.flight_no AS first_flight,
@@ -645,10 +645,45 @@ max_1_transfer_and_non_circular_flights AS (
     second_scheduled_arrival_time
   FROM no_transfer_flights
 ),
-max_1_transfer_and_non_circular_flights_within_24h AS (
-    SELECT *
+max_1_transfer_and_non_circular_flights_with_travel_times AS (
+    SELECT 
+        first_flight,
+        second_flight,
+        first_departure_airport,
+        first_arrival_airport,
+        second_departure_airport,
+        second_arrival_airport,
+        first_scheduled_departure_time,
+        first_scheduled_arrival_time,
+        second_scheduled_departure_time,
+        second_scheduled_arrival_time,
+        CASE WHEN first_scheduled_arrival_time - first_scheduled_departure_time < '00:00:00'::INTERVAL
+            THEN first_scheduled_arrival_time - first_scheduled_departure_time + INTERVAL '24 HOURS' 
+            ELSE first_scheduled_arrival_time - first_scheduled_departure_time 
+        END as normalized_first_leg,
+        CASE WHEN second_scheduled_departure_time - first_scheduled_arrival_time < '00:00:00'::INTERVAL
+            THEN second_scheduled_departure_time - first_scheduled_arrival_time + INTERVAL '24 HOURS' 
+            ELSE second_scheduled_departure_time - first_scheduled_arrival_time 
+        END as normalized_second_leg,
+        CASE WHEN second_scheduled_arrival_time - second_scheduled_departure_time < '00:00:00'::INTERVAL 
+            THEN second_scheduled_arrival_time - second_scheduled_departure_time + INTERVAL '24 HOURS' 
+            ELSE second_scheduled_arrival_time - second_scheduled_departure_time 
+        END as normalized_third_leg
     FROM max_1_transfer_and_non_circular_flights
-    WHERE first_scheduled_departure_time NOT BETWEEN second_scheduled_departure_time AND second_scheduled_arrival_time  -- since we have no dates, this is a good trick I think to figure out if the flights took more than 24 hours?
+), max_1_transfer_and_non_circular_flights_within_24hours AS (
+    SELECT 
+        first_flight,
+        second_flight,
+        first_departure_airport,
+        first_arrival_airport,
+        second_departure_airport,
+        second_arrival_airport,
+        first_scheduled_departure_time,
+        first_scheduled_arrival_time,
+        second_scheduled_departure_time,
+        second_scheduled_arrival_time
+    FROM max_1_transfer_and_non_circular_flights_with_travel_times
+    WHERE normalized_first_leg + normalized_second_leg + normalized_third_leg <= INTERVAL '24 HOURS'
 ) SELECT
     first_flight as first_flight_no,
     second_flight as second_flight_no,
@@ -659,8 +694,64 @@ max_1_transfer_and_non_circular_flights_within_24h AS (
     CASE WHEN second_flight IS NOT NULL THEN first_scheduled_arrival_time END as transfer_airport_arrival_time,
     CASE WHEN second_flight IS NOT NULL THEN second_scheduled_departure_time END as transfer_airport_departure_time,
     COALESCE(second_scheduled_arrival_time, first_scheduled_arrival_time) as destination_arrival_time
-FROM max_1_transfer_and_non_circular_flights_within_24h AS valid_routes
+FROM max_1_transfer_and_non_circular_flights_within_24hours AS valid_routes
 ```
 
 It uses our `jwan.test_routes` table.
 
+__ 
+3. Dealing with time requirement of <= 24 hours was tricky.
+
+I basically took the 3 legs, normalized them by doing arrival_time - departure_time and adding 24 hours if it was negative. I add up the 3 legs and if they're less than or equal to 24 hours, we take those rows.
+```
+max_1_transfer_and_non_circular_flights_with_travel_times AS (
+    SELECT 
+        first_flight,
+        second_flight,
+        first_departure_airport,
+        first_arrival_airport,
+        second_departure_airport,
+        second_arrival_airport,
+        first_scheduled_departure_time,
+        first_scheduled_arrival_time,
+        second_scheduled_departure_time,
+        second_scheduled_arrival_time,
+        CASE WHEN first_scheduled_arrival_time - first_scheduled_departure_time < '00:00:00'::INTERVAL
+            THEN first_scheduled_arrival_time - first_scheduled_departure_time + INTERVAL '24 HOURS' 
+            ELSE first_scheduled_arrival_time - first_scheduled_departure_time 
+        END as normalized_first_leg,
+        CASE WHEN second_scheduled_departure_time - first_scheduled_arrival_time < '00:00:00'::INTERVAL
+            THEN second_scheduled_departure_time - first_scheduled_arrival_time + INTERVAL '24 HOURS' 
+            ELSE second_scheduled_departure_time - first_scheduled_arrival_time 
+        END as normalized_second_leg,
+        CASE WHEN second_scheduled_arrival_time - second_scheduled_departure_time < '00:00:00'::INTERVAL 
+            THEN second_scheduled_arrival_time - second_scheduled_departure_time + INTERVAL '24 HOURS' 
+            ELSE second_scheduled_arrival_time - second_scheduled_departure_time 
+        END as normalized_third_leg
+    FROM max_1_transfer_and_non_circular_flights
+), max_1_transfer_and_non_circular_flights_within_24hours AS (
+    SELECT 
+        first_flight,
+        second_flight,
+        first_departure_airport,
+        first_arrival_airport,
+        second_departure_airport,
+        second_arrival_airport,
+        first_scheduled_departure_time,
+        first_scheduled_arrival_time,
+        second_scheduled_departure_time,
+        second_scheduled_arrival_time
+    FROM max_1_transfer_and_non_circular_flights_with_travel_times
+    WHERE normalized_first_leg + normalized_second_leg + normalized_third_leg <= INTERVAL '24 HOURS'
+)
+```
+results in my test schema:
+
+```
+ first_flight | second_flight | first_departure_airport | first_arrival_airport | second_departure_airport | second_arrival_airport | first_scheduled_departure_time | first_scheduled_arrival_time | second_scheduled_departure_time | second_scheduled_arrival_time | normalized_first_leg | normalized_second_leg | normalized_third_leg
+--------------+---------------+-------------------------+-----------------------+--------------------------+------------------------+--------------------------------+------------------------------+---------------------------------+-------------------------------+----------------------+-----------------------+----------------------
+ PG0012       | PG0007        | GDZ                     | VKO                   | VKO                      | JOK                    | 07:55:00                       | 09:40:00                     | 09:40:00                        | 11:50:00                      | 01:45:00             | 00:00:00              | 02:10:00
+ PG0033       | PG0012        | ESL                     | GDZ                   | GDZ                      | VKO                    | 13:50:00                       | 15:35:00                     | 07:55:00                        | 09:40:00                      | 01:45:00             | 16:20:00              | 01:45:00
+(2 rows)
+```
+Passes the eyeball test.
