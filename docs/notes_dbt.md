@@ -59,3 +59,15 @@ and then something like:
 ```postgresql
 select * from dbt.ticket_sales_counts limit 5;
 ```
+
+## How to run all tests
+
+```
+dbt test
+```
+
+It'll recursively go through folders and run the sql files (they don't even need to be prepended with `test`).
+
+The model tests need to be in the models folder if you test columns.
+
+We installed `dbt-utils`. It's in our `packages.yml` file and you can install it with `dbt deps`
