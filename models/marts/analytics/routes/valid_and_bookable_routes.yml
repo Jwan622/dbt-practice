@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: valid_and_bookable_routes
+    columns:
+      - name: first_flight_no
+        tests:
+          - not_null
