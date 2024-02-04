@@ -7711,3 +7711,658 @@ OR actual_28d_total <> expected_28d_total
 [0m15:16:05.844693 [debug] [MainThread]: Command `dbt test` failed at 15:16:05.844636 after 0.40 seconds
 [0m15:16:05.844918 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10c136f40>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10da41a90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dc774c0>]}
 [0m15:16:05.845142 [debug] [MainThread]: Flushing usage events
+[0m16:04:12.596113 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e8e0550>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10fe0f970>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10fdf30a0>]}
+
+
+============================== 16:04:12.613607 | 16e7bffe-30cf-40bb-8db5-e6c197ab6bc6 ==============================
+[0m16:04:12.613607 [info ] [MainThread]: Running with dbt=1.5.4
+[0m16:04:12.614092 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': '/Users/jwan/Desktop/de-technical-assessment', 'fail_fast': 'False', 'version_check': 'True', 'log_path': '/Users/jwan/Desktop/de-technical-assessment/logs', 'debug': 'False', 'warn_error': 'None', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'log_format': 'default', 'static_parser': 'True', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'introspect': 'True', 'target_path': 'None', 'send_anonymous_usage_stats': 'True'}
+[0m16:04:12.669940 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': '16e7bffe-30cf-40bb-8db5-e6c197ab6bc6', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10fdf30a0>]}
+[0m16:04:12.685036 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': '16e7bffe-30cf-40bb-8db5-e6c197ab6bc6', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1101c7610>]}
+[0m16:04:12.686471 [info ] [MainThread]: Registered adapter: postgres=1.5.4
+[0m16:04:12.706270 [debug] [MainThread]: checksum: 5d6b65bf0937b31c1cb174f5650843d5ea9953bdf3de7df3d9ed5979670d6d21, vars: {}, profile: , target: , version: 1.5.4
+[0m16:04:12.762086 [debug] [MainThread]: Partial parsing enabled: 2 files deleted, 1 files added, 0 files changed.
+[0m16:04:12.762516 [debug] [MainThread]: Partial parsing: added file: plaid_de://tests/marts/analytics/ticket_sales/test_ticket_sales_counts_are_valid.sql
+[0m16:04:12.762743 [debug] [MainThread]: Partial parsing: deleted file: plaid_de://tests/ticket_sales/test_ticket_sales_counts_are_valid.sql
+[0m16:04:12.794423 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': '16e7bffe-30cf-40bb-8db5-e6c197ab6bc6', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x110527f40>]}
+[0m16:04:12.798961 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': '16e7bffe-30cf-40bb-8db5-e6c197ab6bc6', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x110425a60>]}
+[0m16:04:12.799278 [info ] [MainThread]: Found 3 models, 1 test, 0 snapshots, 0 analyses, 307 macros, 0 operations, 0 seed files, 0 sources, 0 exposures, 0 metrics, 0 groups
+[0m16:04:12.799546 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '16e7bffe-30cf-40bb-8db5-e6c197ab6bc6', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1104259d0>]}
+[0m16:04:12.800511 [info ] [MainThread]: 
+[0m16:04:12.801014 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m16:04:12.801735 [debug] [ThreadPool]: Acquiring new postgres connection 'list_bookings'
+[0m16:04:12.808721 [debug] [ThreadPool]: Using postgres connection "list_bookings"
+[0m16:04:12.808960 [debug] [ThreadPool]: On list_bookings: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "connection_name": "list_bookings"} */
+
+    select distinct nspname from pg_namespace
+  
+[0m16:04:12.809158 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m16:04:13.184031 [debug] [ThreadPool]: SQL status: SELECT 11 in 0.0 seconds
+[0m16:04:13.185599 [debug] [ThreadPool]: On list_bookings: Close
+[0m16:04:13.186889 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_bookings, now list_bookings_dbt)
+[0m16:04:13.192246 [debug] [ThreadPool]: Using postgres connection "list_bookings_dbt"
+[0m16:04:13.192699 [debug] [ThreadPool]: On list_bookings_dbt: BEGIN
+[0m16:04:13.193057 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m16:04:13.224149 [debug] [ThreadPool]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:13.224557 [debug] [ThreadPool]: Using postgres connection "list_bookings_dbt"
+[0m16:04:13.224796 [debug] [ThreadPool]: On list_bookings_dbt: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "connection_name": "list_bookings_dbt"} */
+select
+      'bookings' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'dbt'
+    union all
+    select
+      'bookings' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'dbt'
+  
+[0m16:04:13.261651 [debug] [ThreadPool]: SQL status: SELECT 4 in 0.0 seconds
+[0m16:04:13.264591 [debug] [ThreadPool]: On list_bookings_dbt: ROLLBACK
+[0m16:04:13.265504 [debug] [ThreadPool]: On list_bookings_dbt: Close
+[0m16:04:13.275232 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:13.275762 [debug] [MainThread]: On master: BEGIN
+[0m16:04:13.275990 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m16:04:13.330971 [debug] [MainThread]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:13.331727 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:13.332863 [debug] [MainThread]: On master: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "connection_name": "master"} */
+with relation as (
+        select
+            pg_rewrite.ev_class as class,
+            pg_rewrite.oid as id
+        from pg_rewrite
+    ),
+    class as (
+        select
+            oid as id,
+            relname as name,
+            relnamespace as schema,
+            relkind as kind
+        from pg_class
+    ),
+    dependency as (
+        select distinct
+            pg_depend.objid as id,
+            pg_depend.refobjid as ref
+        from pg_depend
+    ),
+    schema as (
+        select
+            pg_namespace.oid as id,
+            pg_namespace.nspname as name
+        from pg_namespace
+        where nspname != 'information_schema' and nspname not like 'pg\_%'
+    ),
+    referenced as (
+        select
+            relation.id AS id,
+            referenced_class.name ,
+            referenced_class.schema ,
+            referenced_class.kind
+        from relation
+        join class as referenced_class on relation.class=referenced_class.id
+        where referenced_class.kind in ('r', 'v')
+    ),
+    relationships as (
+        select
+            referenced.name as referenced_name,
+            referenced.schema as referenced_schema_id,
+            dependent_class.name as dependent_name,
+            dependent_class.schema as dependent_schema_id,
+            referenced.kind as kind
+        from referenced
+        join dependency on referenced.id=dependency.id
+        join class as dependent_class on dependency.ref=dependent_class.id
+        where
+            (referenced.name != dependent_class.name or
+             referenced.schema != dependent_class.schema)
+    )
+
+    select
+        referenced_schema.name as referenced_schema,
+        relationships.referenced_name as referenced_name,
+        dependent_schema.name as dependent_schema,
+        relationships.dependent_name as dependent_name
+    from relationships
+    join schema as dependent_schema on relationships.dependent_schema_id=dependent_schema.id
+    join schema as referenced_schema on relationships.referenced_schema_id=referenced_schema.id
+    group by referenced_schema, referenced_name, dependent_schema, dependent_name
+    order by referenced_schema, referenced_name, dependent_schema, dependent_name;
+[0m16:04:13.426234 [debug] [MainThread]: SQL status: SELECT 6 in 0.0 seconds
+[0m16:04:13.431029 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '16e7bffe-30cf-40bb-8db5-e6c197ab6bc6', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1105ce490>]}
+[0m16:04:13.432670 [debug] [MainThread]: On master: ROLLBACK
+[0m16:04:13.434184 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:13.434741 [debug] [MainThread]: On master: BEGIN
+[0m16:04:13.436524 [debug] [MainThread]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:13.437119 [debug] [MainThread]: On master: COMMIT
+[0m16:04:13.440091 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:13.440807 [debug] [MainThread]: On master: COMMIT
+[0m16:04:13.443335 [debug] [MainThread]: SQL status: COMMIT in 0.0 seconds
+[0m16:04:13.444350 [debug] [MainThread]: On master: Close
+[0m16:04:13.445940 [info ] [MainThread]: Concurrency: 4 threads (target='dev')
+[0m16:04:13.446804 [info ] [MainThread]: 
+[0m16:04:13.456391 [debug] [Thread-1  ]: Began running node model.plaid_de.redemption_bookings_counts_by_day
+[0m16:04:13.457295 [debug] [Thread-2  ]: Began running node model.plaid_de.ticket_sales_counts
+[0m16:04:13.458018 [debug] [Thread-3  ]: Began running node model.plaid_de.valid_and_bookable_routes
+[0m16:04:13.458992 [info ] [Thread-1  ]: 1 of 3 START sql table model dbt.redemption_bookings_counts_by_day ............. [RUN]
+[0m16:04:13.459919 [info ] [Thread-2  ]: 2 of 3 START sql table model dbt.ticket_sales_counts ........................... [RUN]
+[0m16:04:13.460405 [info ] [Thread-3  ]: 3 of 3 START sql table model dbt.valid_and_bookable_routes ..................... [RUN]
+[0m16:04:13.461028 [debug] [Thread-1  ]: Re-using an available connection from the pool (formerly list_bookings_dbt, now model.plaid_de.redemption_bookings_counts_by_day)
+[0m16:04:13.461532 [debug] [Thread-2  ]: Acquiring new postgres connection 'model.plaid_de.ticket_sales_counts'
+[0m16:04:13.462005 [debug] [Thread-3  ]: Acquiring new postgres connection 'model.plaid_de.valid_and_bookable_routes'
+[0m16:04:13.462281 [debug] [Thread-1  ]: Began compiling node model.plaid_de.redemption_bookings_counts_by_day
+[0m16:04:13.462515 [debug] [Thread-2  ]: Began compiling node model.plaid_de.ticket_sales_counts
+[0m16:04:13.462745 [debug] [Thread-3  ]: Began compiling node model.plaid_de.valid_and_bookable_routes
+[0m16:04:13.469510 [debug] [Thread-1  ]: Writing injected SQL for node "model.plaid_de.redemption_bookings_counts_by_day"
+[0m16:04:13.471661 [debug] [Thread-2  ]: Writing injected SQL for node "model.plaid_de.ticket_sales_counts"
+[0m16:04:13.474370 [debug] [Thread-3  ]: Writing injected SQL for node "model.plaid_de.valid_and_bookable_routes"
+[0m16:04:13.475640 [debug] [Thread-2  ]: Timing info for model.plaid_de.ticket_sales_counts (compile): 16:04:13.469751 => 16:04:13.475454
+[0m16:04:13.476002 [debug] [Thread-1  ]: Timing info for model.plaid_de.redemption_bookings_counts_by_day (compile): 16:04:13.462910 => 16:04:13.475802
+[0m16:04:13.476348 [debug] [Thread-3  ]: Timing info for model.plaid_de.valid_and_bookable_routes (compile): 16:04:13.471884 => 16:04:13.476178
+[0m16:04:13.476651 [debug] [Thread-2  ]: Began executing node model.plaid_de.ticket_sales_counts
+[0m16:04:13.476957 [debug] [Thread-1  ]: Began executing node model.plaid_de.redemption_bookings_counts_by_day
+[0m16:04:13.477264 [debug] [Thread-3  ]: Began executing node model.plaid_de.valid_and_bookable_routes
+[0m16:04:13.540435 [debug] [Thread-1  ]: Writing runtime sql for node "model.plaid_de.redemption_bookings_counts_by_day"
+[0m16:04:13.541120 [debug] [Thread-2  ]: Writing runtime sql for node "model.plaid_de.ticket_sales_counts"
+[0m16:04:13.550209 [debug] [Thread-3  ]: Writing runtime sql for node "model.plaid_de.valid_and_bookable_routes"
+[0m16:04:13.556973 [debug] [Thread-2  ]: Using postgres connection "model.plaid_de.ticket_sales_counts"
+[0m16:04:13.558139 [debug] [Thread-1  ]: Using postgres connection "model.plaid_de.redemption_bookings_counts_by_day"
+[0m16:04:13.558967 [debug] [Thread-3  ]: Using postgres connection "model.plaid_de.valid_and_bookable_routes"
+[0m16:04:13.559804 [debug] [Thread-2  ]: On model.plaid_de.ticket_sales_counts: BEGIN
+[0m16:04:13.560206 [debug] [Thread-1  ]: On model.plaid_de.redemption_bookings_counts_by_day: BEGIN
+[0m16:04:13.560492 [debug] [Thread-3  ]: On model.plaid_de.valid_and_bookable_routes: BEGIN
+[0m16:04:13.560968 [debug] [Thread-2  ]: Opening a new connection, currently in state init
+[0m16:04:13.561807 [debug] [Thread-1  ]: Opening a new connection, currently in state closed
+[0m16:04:13.562249 [debug] [Thread-3  ]: Opening a new connection, currently in state init
+[0m16:04:13.649622 [debug] [Thread-1  ]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:13.650134 [debug] [Thread-1  ]: Using postgres connection "model.plaid_de.redemption_bookings_counts_by_day"
+[0m16:04:13.650452 [debug] [Thread-1  ]: On model.plaid_de.redemption_bookings_counts_by_day: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.redemption_bookings_counts_by_day"} */
+
+  
+    
+
+  create  table "bookings"."dbt"."redemption_bookings_counts_by_day__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
+
+SELECT
+    DATE_TRUNC('day', b.book_date) AS date,
+    COUNT(*) AS redemption_count
+FROM bookings b
+WHERE total_amount = -1
+    OR total_amount = 0
+    OR total_amount = -12345678.00
+GROUP BY date
+ORDER BY redemption_count desc
+  );
+  
+[0m16:04:13.697670 [debug] [Thread-3  ]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:13.698950 [debug] [Thread-3  ]: Using postgres connection "model.plaid_de.valid_and_bookable_routes"
+[0m16:04:13.699652 [debug] [Thread-3  ]: On model.plaid_de.valid_and_bookable_routes: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.valid_and_bookable_routes"} */
+
+  
+    
+
+  create  table "bookings"."dbt"."valid_and_bookable_routes__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
+
+WITH no_transfer_flights AS (
+    SELECT
+        route1.flight_no AS first_flight,
+        NULL AS second_flight,
+        route1.departure_airport AS first_departure_airport,
+        route1.arrival_airport AS first_arrival_airport,
+        NULL AS second_departure_airport,
+        NULL AS second_arrival_airport,
+        route1.scheduled_departure as first_scheduled_departure_time,
+        NULL::time without time zone as second_scheduled_departure_time,
+        route1.scheduled_arrival as first_scheduled_arrival_time,
+        NULL::time without time zone as second_scheduled_arrival_time
+    FROM routes AS route1
+),
+one_transfer_flights AS (
+    SELECT
+        route1.flight_no AS first_flight,
+        route2.flight_no AS second_flight,
+        route1.departure_airport AS first_departure_airport,
+        route1.arrival_airport AS first_arrival_airport,
+        route2.departure_airport AS second_departure_airport,
+        route2.arrival_airport AS second_arrival_airport,
+        route1.scheduled_departure as first_scheduled_departure_time,
+        route2.scheduled_departure as second_scheduled_departure_time,
+        route1.scheduled_arrival as first_scheduled_arrival_time,
+        route2.scheduled_arrival as second_scheduled_arrival_time
+    FROM routes AS route1
+    LEFT OUTER JOIN routes AS route2
+    ON route1.arrival_airport = route2.departure_airport
+),
+max_1_transfer_and_non_circular_flights AS (
+  SELECT
+    first_flight,
+    second_flight,
+    first_departure_airport,
+    first_arrival_airport,
+    second_departure_airport,
+    second_arrival_airport,
+    first_scheduled_departure_time,
+    second_scheduled_departure_time,
+    first_scheduled_arrival_time,
+    second_scheduled_arrival_time
+  FROM one_transfer_flights
+  WHERE first_departure_airport <> second_arrival_airport -- non-circular
+  UNION ALL
+  SELECT
+    first_flight,
+    second_flight,
+    first_departure_airport,
+    first_arrival_airport,
+    second_departure_airport,
+    second_arrival_airport,
+    first_scheduled_departure_time,
+    second_scheduled_departure_time,
+    first_scheduled_arrival_time,
+    second_scheduled_arrival_time
+  FROM no_transfer_flights
+),
+max_1_transfer_and_non_circular_flights_with_travel_times AS (
+    SELECT
+        first_flight,
+        second_flight,
+        first_departure_airport,
+        first_arrival_airport,
+        second_departure_airport,
+        second_arrival_airport,
+        first_scheduled_departure_time,
+        first_scheduled_arrival_time,
+        second_scheduled_departure_time,
+        second_scheduled_arrival_time,
+        CASE WHEN first_scheduled_arrival_time - first_scheduled_departure_time < '00:00:00'::INTERVAL
+            THEN first_scheduled_arrival_time - first_scheduled_departure_time + INTERVAL '24 HOURS'
+            ELSE first_scheduled_arrival_time - first_scheduled_departure_time
+        END as normalized_first_leg,
+        CASE WHEN second_scheduled_departure_time - first_scheduled_arrival_time < '00:00:00'::INTERVAL
+            THEN second_scheduled_departure_time - first_scheduled_arrival_time + INTERVAL '24 HOURS'
+            ELSE second_scheduled_departure_time - first_scheduled_arrival_time
+        END as normalized_second_leg,
+        CASE WHEN second_scheduled_arrival_time - second_scheduled_departure_time < '00:00:00'::INTERVAL
+            THEN second_scheduled_arrival_time - second_scheduled_departure_time + INTERVAL '24 HOURS'
+            ELSE second_scheduled_arrival_time - second_scheduled_departure_time
+        END as normalized_third_leg
+    FROM max_1_transfer_and_non_circular_flights
+), max_1_transfer_and_non_circular_flights_within_24hours AS (
+    SELECT
+        first_flight,
+        second_flight,
+        first_departure_airport,
+        first_arrival_airport,
+        second_departure_airport,
+        second_arrival_airport,
+        first_scheduled_departure_time,
+        first_scheduled_arrival_time,
+        second_scheduled_departure_time,
+        second_scheduled_arrival_time
+    FROM max_1_transfer_and_non_circular_flights_with_travel_times
+    WHERE normalized_first_leg + normalized_second_leg + normalized_third_leg <= INTERVAL '24 HOURS'
+) SELECT
+    first_flight as first_flight_no,
+    second_flight as second_flight_no,
+    first_departure_airport as origin_airport,
+    COALESCE(second_arrival_airport, first_arrival_airport) as destination_airport_code,
+    CASE WHEN second_flight IS NOT NULL THEN first_arrival_airport END as transfer_airport_code,
+    first_scheduled_departure_time as first_scheduled_departure_time,
+    CASE WHEN second_flight IS NOT NULL THEN first_scheduled_arrival_time END as transfer_airport_arrival_time,
+    CASE WHEN second_flight IS NOT NULL THEN second_scheduled_departure_time END as transfer_airport_departure_time,
+    COALESCE(second_scheduled_arrival_time, first_scheduled_arrival_time) as destination_arrival_time
+FROM max_1_transfer_and_non_circular_flights_within_24hours AS valid_routes
+  );
+  
+[0m16:04:13.745589 [debug] [Thread-2  ]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:13.759504 [debug] [Thread-2  ]: Using postgres connection "model.plaid_de.ticket_sales_counts"
+[0m16:04:13.760011 [debug] [Thread-2  ]: On model.plaid_de.ticket_sales_counts: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.ticket_sales_counts"} */
+
+  
+    
+
+  create  table "bookings"."dbt"."ticket_sales_counts__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
+
+WITH daily_ticket_sales AS (
+    SELECT
+        DATE_TRUNC('day', b.book_date) AS sale_date,
+        COUNT(t.ticket_no) AS total_tickets
+    FROM bookings b
+    JOIN tickets t ON b.book_ref = t.book_ref
+    GROUP BY sale_date
+),
+
+rolling_7d_ticket_sales AS (
+    SELECT
+        sale_date,
+        SUM(total_tickets) OVER (ORDER BY sale_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS rolling_7_days_total
+    FROM daily_ticket_sales
+),
+
+rolling_28d_ticket_sales AS (
+    SELECT
+        sale_date,
+        SUM(total_tickets) OVER (ORDER BY sale_date ROWS BETWEEN 27 PRECEDING AND CURRENT ROW) AS rolling_28_days_total
+    FROM daily_ticket_sales
+)
+SELECT
+    dts.sale_date AS date,
+    dts.total_tickets AS daily_total_tickets,
+    rolling_7d.rolling_7_days_total,
+    rolling_28d.rolling_28_days_total
+FROM daily_ticket_sales dts
+LEFT JOIN rolling_7d_ticket_sales AS rolling_7d
+    ON dts.sale_date = rolling_7d.sale_date
+LEFT JOIN rolling_28d_ticket_sales AS rolling_28d
+    ON dts.sale_date = rolling_28d.sale_date
+  );
+  
+[0m16:04:14.475056 [debug] [Thread-1  ]: SQL status: SELECT 111 in 1.0 seconds
+[0m16:04:14.506210 [debug] [Thread-1  ]: Using postgres connection "model.plaid_de.redemption_bookings_counts_by_day"
+[0m16:04:14.533480 [debug] [Thread-1  ]: On model.plaid_de.redemption_bookings_counts_by_day: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.redemption_bookings_counts_by_day"} */
+alter table "bookings"."dbt"."redemption_bookings_counts_by_day" rename to "redemption_bookings_counts_by_day__dbt_backup"
+[0m16:04:14.535815 [debug] [Thread-1  ]: SQL status: ALTER TABLE in 0.0 seconds
+[0m16:04:14.543881 [debug] [Thread-1  ]: Using postgres connection "model.plaid_de.redemption_bookings_counts_by_day"
+[0m16:04:14.544799 [debug] [Thread-1  ]: On model.plaid_de.redemption_bookings_counts_by_day: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.redemption_bookings_counts_by_day"} */
+alter table "bookings"."dbt"."redemption_bookings_counts_by_day__dbt_tmp" rename to "redemption_bookings_counts_by_day"
+[0m16:04:14.547279 [debug] [Thread-1  ]: SQL status: ALTER TABLE in 0.0 seconds
+[0m16:04:14.574607 [debug] [Thread-1  ]: On model.plaid_de.redemption_bookings_counts_by_day: COMMIT
+[0m16:04:14.575043 [debug] [Thread-1  ]: Using postgres connection "model.plaid_de.redemption_bookings_counts_by_day"
+[0m16:04:14.575289 [debug] [Thread-1  ]: On model.plaid_de.redemption_bookings_counts_by_day: COMMIT
+[0m16:04:14.587881 [debug] [Thread-1  ]: SQL status: COMMIT in 0.0 seconds
+[0m16:04:14.592178 [debug] [Thread-1  ]: Using postgres connection "model.plaid_de.redemption_bookings_counts_by_day"
+[0m16:04:14.592558 [debug] [Thread-1  ]: On model.plaid_de.redemption_bookings_counts_by_day: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.redemption_bookings_counts_by_day"} */
+drop table if exists "bookings"."dbt"."redemption_bookings_counts_by_day__dbt_backup" cascade
+[0m16:04:14.608327 [debug] [Thread-1  ]: SQL status: DROP TABLE in 0.0 seconds
+[0m16:04:14.609972 [debug] [Thread-1  ]: Timing info for model.plaid_de.redemption_bookings_counts_by_day (execute): 16:04:13.506331 => 16:04:14.609689
+[0m16:04:14.610321 [debug] [Thread-1  ]: On model.plaid_de.redemption_bookings_counts_by_day: Close
+[0m16:04:14.611231 [debug] [Thread-1  ]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '16e7bffe-30cf-40bb-8db5-e6c197ab6bc6', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1101e0070>]}
+[0m16:04:14.614651 [info ] [Thread-1  ]: 1 of 3 OK created sql table model dbt.redemption_bookings_counts_by_day ........ [[32mSELECT 111[0m in 1.15s]
+[0m16:04:14.618954 [debug] [Thread-1  ]: Finished running node model.plaid_de.redemption_bookings_counts_by_day
+[0m16:04:14.693648 [debug] [Thread-3  ]: SQL status: SELECT 8112 in 1.0 seconds
+[0m16:04:14.703422 [debug] [Thread-3  ]: Using postgres connection "model.plaid_de.valid_and_bookable_routes"
+[0m16:04:14.705041 [debug] [Thread-3  ]: On model.plaid_de.valid_and_bookable_routes: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.valid_and_bookable_routes"} */
+alter table "bookings"."dbt"."valid_and_bookable_routes" rename to "valid_and_bookable_routes__dbt_backup"
+[0m16:04:14.708217 [debug] [Thread-3  ]: SQL status: ALTER TABLE in 0.0 seconds
+[0m16:04:14.718606 [debug] [Thread-3  ]: Using postgres connection "model.plaid_de.valid_and_bookable_routes"
+[0m16:04:14.721049 [debug] [Thread-3  ]: On model.plaid_de.valid_and_bookable_routes: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.valid_and_bookable_routes"} */
+alter table "bookings"."dbt"."valid_and_bookable_routes__dbt_tmp" rename to "valid_and_bookable_routes"
+[0m16:04:14.722544 [debug] [Thread-3  ]: SQL status: ALTER TABLE in 0.0 seconds
+[0m16:04:14.728376 [debug] [Thread-3  ]: On model.plaid_de.valid_and_bookable_routes: COMMIT
+[0m16:04:14.729277 [debug] [Thread-3  ]: Using postgres connection "model.plaid_de.valid_and_bookable_routes"
+[0m16:04:14.730049 [debug] [Thread-3  ]: On model.plaid_de.valid_and_bookable_routes: COMMIT
+[0m16:04:14.741143 [debug] [Thread-3  ]: SQL status: COMMIT in 0.0 seconds
+[0m16:04:14.761261 [debug] [Thread-3  ]: Using postgres connection "model.plaid_de.valid_and_bookable_routes"
+[0m16:04:14.762620 [debug] [Thread-3  ]: On model.plaid_de.valid_and_bookable_routes: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.valid_and_bookable_routes"} */
+drop table if exists "bookings"."dbt"."valid_and_bookable_routes__dbt_backup" cascade
+[0m16:04:14.771304 [debug] [Thread-3  ]: SQL status: DROP TABLE in 0.0 seconds
+[0m16:04:14.774240 [debug] [Thread-3  ]: Timing info for model.plaid_de.valid_and_bookable_routes (execute): 16:04:13.541315 => 16:04:14.773904
+[0m16:04:14.774839 [debug] [Thread-3  ]: On model.plaid_de.valid_and_bookable_routes: Close
+[0m16:04:14.776727 [debug] [Thread-3  ]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '16e7bffe-30cf-40bb-8db5-e6c197ab6bc6', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1101c7fa0>]}
+[0m16:04:14.778154 [info ] [Thread-3  ]: 3 of 3 OK created sql table model dbt.valid_and_bookable_routes ................ [[32mSELECT 8112[0m in 1.31s]
+[0m16:04:14.779857 [debug] [Thread-3  ]: Finished running node model.plaid_de.valid_and_bookable_routes
+[0m16:04:16.013199 [debug] [Thread-2  ]: SQL status: SELECT 117 in 2.0 seconds
+[0m16:04:16.021334 [debug] [Thread-2  ]: Using postgres connection "model.plaid_de.ticket_sales_counts"
+[0m16:04:16.022090 [debug] [Thread-2  ]: On model.plaid_de.ticket_sales_counts: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.ticket_sales_counts"} */
+alter table "bookings"."dbt"."ticket_sales_counts" rename to "ticket_sales_counts__dbt_backup"
+[0m16:04:16.024137 [debug] [Thread-2  ]: SQL status: ALTER TABLE in 0.0 seconds
+[0m16:04:16.029730 [debug] [Thread-2  ]: Using postgres connection "model.plaid_de.ticket_sales_counts"
+[0m16:04:16.030451 [debug] [Thread-2  ]: On model.plaid_de.ticket_sales_counts: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.ticket_sales_counts"} */
+alter table "bookings"."dbt"."ticket_sales_counts__dbt_tmp" rename to "ticket_sales_counts"
+[0m16:04:16.031788 [debug] [Thread-2  ]: SQL status: ALTER TABLE in 0.0 seconds
+[0m16:04:16.036801 [debug] [Thread-2  ]: On model.plaid_de.ticket_sales_counts: COMMIT
+[0m16:04:16.037605 [debug] [Thread-2  ]: Using postgres connection "model.plaid_de.ticket_sales_counts"
+[0m16:04:16.038277 [debug] [Thread-2  ]: On model.plaid_de.ticket_sales_counts: COMMIT
+[0m16:04:16.039990 [debug] [Thread-2  ]: SQL status: COMMIT in 0.0 seconds
+[0m16:04:16.048238 [debug] [Thread-2  ]: Using postgres connection "model.plaid_de.ticket_sales_counts"
+[0m16:04:16.049392 [debug] [Thread-2  ]: On model.plaid_de.ticket_sales_counts: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "model.plaid_de.ticket_sales_counts"} */
+drop table if exists "bookings"."dbt"."ticket_sales_counts__dbt_backup" cascade
+[0m16:04:16.053334 [debug] [Thread-2  ]: SQL status: DROP TABLE in 0.0 seconds
+[0m16:04:16.057329 [debug] [Thread-2  ]: Timing info for model.plaid_de.ticket_sales_counts (execute): 16:04:13.477480 => 16:04:16.057037
+[0m16:04:16.057696 [debug] [Thread-2  ]: On model.plaid_de.ticket_sales_counts: Close
+[0m16:04:16.058455 [debug] [Thread-2  ]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '16e7bffe-30cf-40bb-8db5-e6c197ab6bc6', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1106c8b80>]}
+[0m16:04:16.058971 [info ] [Thread-2  ]: 2 of 3 OK created sql table model dbt.ticket_sales_counts ...................... [[32mSELECT 117[0m in 2.60s]
+[0m16:04:16.059452 [debug] [Thread-2  ]: Finished running node model.plaid_de.ticket_sales_counts
+[0m16:04:16.062785 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:16.063068 [debug] [MainThread]: On master: BEGIN
+[0m16:04:16.063337 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m16:04:16.096276 [debug] [MainThread]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:16.096736 [debug] [MainThread]: On master: COMMIT
+[0m16:04:16.096973 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:16.097178 [debug] [MainThread]: On master: COMMIT
+[0m16:04:16.097622 [debug] [MainThread]: SQL status: COMMIT in 0.0 seconds
+[0m16:04:16.097912 [debug] [MainThread]: On master: Close
+[0m16:04:16.098478 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m16:04:16.098685 [debug] [MainThread]: Connection 'model.plaid_de.redemption_bookings_counts_by_day' was properly closed.
+[0m16:04:16.098867 [debug] [MainThread]: Connection 'model.plaid_de.ticket_sales_counts' was properly closed.
+[0m16:04:16.099036 [debug] [MainThread]: Connection 'model.plaid_de.valid_and_bookable_routes' was properly closed.
+[0m16:04:16.099811 [info ] [MainThread]: 
+[0m16:04:16.100114 [info ] [MainThread]: Finished running 3 table models in 0 hours 0 minutes and 3.30 seconds (3.30s).
+[0m16:04:16.101136 [debug] [MainThread]: Command end result
+[0m16:04:16.106251 [info ] [MainThread]: 
+[0m16:04:16.106589 [info ] [MainThread]: [32mCompleted successfully[0m
+[0m16:04:16.106917 [info ] [MainThread]: 
+[0m16:04:16.107408 [info ] [MainThread]: Done. PASS=3 WARN=0 ERROR=0 SKIP=0 TOTAL=3
+[0m16:04:16.108387 [debug] [MainThread]: Command `dbt run` succeeded at 16:04:16.108323 after 3.57 seconds
+[0m16:04:16.108715 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e8e0550>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1101e0910>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1104ea7f0>]}
+[0m16:04:16.108985 [debug] [MainThread]: Flushing usage events
+[0m16:04:33.741000 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10c4def40>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10d9e6280>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1092bf6d0>]}
+
+
+============================== 16:04:33.757772 | 64f0901f-7626-45f7-a7ca-f5a5708f267c ==============================
+[0m16:04:33.757772 [info ] [MainThread]: Running with dbt=1.5.4
+[0m16:04:33.758248 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'debug': 'False', 'version_check': 'True', 'log_path': '/Users/jwan/Desktop/de-technical-assessment/logs', 'fail_fast': 'False', 'profiles_dir': '/Users/jwan/Desktop/de-technical-assessment', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'log_format': 'default', 'static_parser': 'True', 'introspect': 'True', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'target_path': 'None', 'send_anonymous_usage_stats': 'True'}
+[0m16:04:33.809304 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': '64f0901f-7626-45f7-a7ca-f5a5708f267c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1092bfa60>]}
+[0m16:04:33.822222 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': '64f0901f-7626-45f7-a7ca-f5a5708f267c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dd9f670>]}
+[0m16:04:33.822666 [info ] [MainThread]: Registered adapter: postgres=1.5.4
+[0m16:04:33.837854 [debug] [MainThread]: checksum: 5d6b65bf0937b31c1cb174f5650843d5ea9953bdf3de7df3d9ed5979670d6d21, vars: {}, profile: , target: , version: 1.5.4
+[0m16:04:33.890561 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 0 files added, 0 files changed.
+[0m16:04:33.890856 [debug] [MainThread]: Partial parsing enabled, no changes found, skipping parsing
+[0m16:04:33.895969 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': '64f0901f-7626-45f7-a7ca-f5a5708f267c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e0770d0>]}
+[0m16:04:33.902604 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': '64f0901f-7626-45f7-a7ca-f5a5708f267c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dfff9d0>]}
+[0m16:04:33.902918 [info ] [MainThread]: Found 3 models, 1 test, 0 snapshots, 0 analyses, 307 macros, 0 operations, 0 seed files, 0 sources, 0 exposures, 0 metrics, 0 groups
+[0m16:04:33.903185 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '64f0901f-7626-45f7-a7ca-f5a5708f267c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dfff940>]}
+[0m16:04:33.904140 [info ] [MainThread]: 
+[0m16:04:33.904648 [debug] [MainThread]: Acquiring new postgres connection 'master'
+[0m16:04:33.905412 [debug] [ThreadPool]: Acquiring new postgres connection 'list_bookings_dbt'
+[0m16:04:33.912891 [debug] [ThreadPool]: Using postgres connection "list_bookings_dbt"
+[0m16:04:33.913117 [debug] [ThreadPool]: On list_bookings_dbt: BEGIN
+[0m16:04:33.913296 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m16:04:34.085172 [debug] [ThreadPool]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:34.085586 [debug] [ThreadPool]: Using postgres connection "list_bookings_dbt"
+[0m16:04:34.085837 [debug] [ThreadPool]: On list_bookings_dbt: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "connection_name": "list_bookings_dbt"} */
+select
+      'bookings' as database,
+      tablename as name,
+      schemaname as schema,
+      'table' as type
+    from pg_tables
+    where schemaname ilike 'dbt'
+    union all
+    select
+      'bookings' as database,
+      viewname as name,
+      schemaname as schema,
+      'view' as type
+    from pg_views
+    where schemaname ilike 'dbt'
+  
+[0m16:04:34.092983 [debug] [ThreadPool]: SQL status: SELECT 4 in 0.0 seconds
+[0m16:04:34.094427 [debug] [ThreadPool]: On list_bookings_dbt: ROLLBACK
+[0m16:04:34.095295 [debug] [ThreadPool]: On list_bookings_dbt: Close
+[0m16:04:34.100054 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:34.100332 [debug] [MainThread]: On master: BEGIN
+[0m16:04:34.100539 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m16:04:34.113430 [debug] [MainThread]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:34.113841 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:34.114188 [debug] [MainThread]: On master: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "connection_name": "master"} */
+with relation as (
+        select
+            pg_rewrite.ev_class as class,
+            pg_rewrite.oid as id
+        from pg_rewrite
+    ),
+    class as (
+        select
+            oid as id,
+            relname as name,
+            relnamespace as schema,
+            relkind as kind
+        from pg_class
+    ),
+    dependency as (
+        select distinct
+            pg_depend.objid as id,
+            pg_depend.refobjid as ref
+        from pg_depend
+    ),
+    schema as (
+        select
+            pg_namespace.oid as id,
+            pg_namespace.nspname as name
+        from pg_namespace
+        where nspname != 'information_schema' and nspname not like 'pg\_%'
+    ),
+    referenced as (
+        select
+            relation.id AS id,
+            referenced_class.name ,
+            referenced_class.schema ,
+            referenced_class.kind
+        from relation
+        join class as referenced_class on relation.class=referenced_class.id
+        where referenced_class.kind in ('r', 'v')
+    ),
+    relationships as (
+        select
+            referenced.name as referenced_name,
+            referenced.schema as referenced_schema_id,
+            dependent_class.name as dependent_name,
+            dependent_class.schema as dependent_schema_id,
+            referenced.kind as kind
+        from referenced
+        join dependency on referenced.id=dependency.id
+        join class as dependent_class on dependency.ref=dependent_class.id
+        where
+            (referenced.name != dependent_class.name or
+             referenced.schema != dependent_class.schema)
+    )
+
+    select
+        referenced_schema.name as referenced_schema,
+        relationships.referenced_name as referenced_name,
+        dependent_schema.name as dependent_schema,
+        relationships.dependent_name as dependent_name
+    from relationships
+    join schema as dependent_schema on relationships.dependent_schema_id=dependent_schema.id
+    join schema as referenced_schema on relationships.referenced_schema_id=referenced_schema.id
+    group by referenced_schema, referenced_name, dependent_schema, dependent_name
+    order by referenced_schema, referenced_name, dependent_schema, dependent_name;
+[0m16:04:34.139126 [debug] [MainThread]: SQL status: SELECT 6 in 0.0 seconds
+[0m16:04:34.140484 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '64f0901f-7626-45f7-a7ca-f5a5708f267c', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e042c70>]}
+[0m16:04:34.140863 [debug] [MainThread]: On master: ROLLBACK
+[0m16:04:34.141486 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:34.141719 [debug] [MainThread]: On master: BEGIN
+[0m16:04:34.142519 [debug] [MainThread]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:34.142807 [debug] [MainThread]: On master: COMMIT
+[0m16:04:34.143046 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:34.143262 [debug] [MainThread]: On master: COMMIT
+[0m16:04:34.143656 [debug] [MainThread]: SQL status: COMMIT in 0.0 seconds
+[0m16:04:34.143938 [debug] [MainThread]: On master: Close
+[0m16:04:34.144514 [info ] [MainThread]: Concurrency: 4 threads (target='dev')
+[0m16:04:34.144837 [info ] [MainThread]: 
+[0m16:04:34.148752 [debug] [Thread-1  ]: Began running node test.plaid_de.test_ticket_sales_counts_are_valid
+[0m16:04:34.149101 [info ] [Thread-1  ]: 1 of 1 START test test_ticket_sales_counts_are_valid ........................... [RUN]
+[0m16:04:34.149682 [debug] [Thread-1  ]: Re-using an available connection from the pool (formerly list_bookings_dbt, now test.plaid_de.test_ticket_sales_counts_are_valid)
+[0m16:04:34.149973 [debug] [Thread-1  ]: Began compiling node test.plaid_de.test_ticket_sales_counts_are_valid
+[0m16:04:34.156503 [debug] [Thread-1  ]: Writing injected SQL for node "test.plaid_de.test_ticket_sales_counts_are_valid"
+[0m16:04:34.157383 [debug] [Thread-1  ]: Timing info for test.plaid_de.test_ticket_sales_counts_are_valid (compile): 16:04:34.150159 => 16:04:34.157214
+[0m16:04:34.157647 [debug] [Thread-1  ]: Began executing node test.plaid_de.test_ticket_sales_counts_are_valid
+[0m16:04:34.168845 [debug] [Thread-1  ]: Writing runtime sql for node "test.plaid_de.test_ticket_sales_counts_are_valid"
+[0m16:04:34.169459 [debug] [Thread-1  ]: Using postgres connection "test.plaid_de.test_ticket_sales_counts_are_valid"
+[0m16:04:34.169702 [debug] [Thread-1  ]: On test.plaid_de.test_ticket_sales_counts_are_valid: BEGIN
+[0m16:04:34.169913 [debug] [Thread-1  ]: Opening a new connection, currently in state closed
+[0m16:04:34.184222 [debug] [Thread-1  ]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:34.184498 [debug] [Thread-1  ]: Using postgres connection "test.plaid_de.test_ticket_sales_counts_are_valid"
+[0m16:04:34.184752 [debug] [Thread-1  ]: On test.plaid_de.test_ticket_sales_counts_are_valid: /* {"app": "dbt", "dbt_version": "1.5.4", "profile_name": "plaid-de", "target_name": "dev", "node_id": "test.plaid_de.test_ticket_sales_counts_are_valid"} */
+select
+      count(*) as failures,
+      count(*) != 0 as should_warn,
+      count(*) != 0 as should_error
+    from (
+      
+
+WITH cte AS (
+    SELECT
+    tsc.date,
+    tsc.rolling_7_days_total AS actual_7d_total,
+    tsc.rolling_28_days_total AS actual_28d_total,
+    SUM(tsc.daily_total_tickets) OVER (
+        ORDER BY tsc.date ASC ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+    ) AS expected_7d_total, -- 6 not 7! god dammit.
+    SUM(tsc.daily_total_tickets) OVER (
+        ORDER BY tsc.date ASC ROWS BETWEEN 27 PRECEDING AND CURRENT ROW
+    ) AS expected_28d_total
+    FROM dbt.ticket_sales_counts tsc
+)
+SELECT
+    '7-day rolling total matches daily_total_tickets sum for last 7 days' AS test,
+    date,
+    actual_7d_total,
+    expected_7d_total,
+    actual_28d_total
+    expected_28d_total
+FROM cte
+WHERE actual_7d_total <> expected_7d_total
+OR actual_28d_total <> expected_28d_total
+      
+    ) dbt_internal_test
+[0m16:04:34.187427 [debug] [Thread-1  ]: SQL status: SELECT 1 in 0.0 seconds
+[0m16:04:34.188982 [debug] [Thread-1  ]: Timing info for test.plaid_de.test_ticket_sales_counts_are_valid (execute): 16:04:34.157810 => 16:04:34.188830
+[0m16:04:34.189238 [debug] [Thread-1  ]: On test.plaid_de.test_ticket_sales_counts_are_valid: ROLLBACK
+[0m16:04:34.189653 [debug] [Thread-1  ]: On test.plaid_de.test_ticket_sales_counts_are_valid: Close
+[0m16:04:34.190725 [info ] [Thread-1  ]: 1 of 1 PASS test_ticket_sales_counts_are_valid ................................. [[32mPASS[0m in 0.04s]
+[0m16:04:34.191220 [debug] [Thread-1  ]: Finished running node test.plaid_de.test_ticket_sales_counts_are_valid
+[0m16:04:34.192174 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:34.192368 [debug] [MainThread]: On master: BEGIN
+[0m16:04:34.192523 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m16:04:34.208937 [debug] [MainThread]: SQL status: BEGIN in 0.0 seconds
+[0m16:04:34.209258 [debug] [MainThread]: On master: COMMIT
+[0m16:04:34.209452 [debug] [MainThread]: Using postgres connection "master"
+[0m16:04:34.209629 [debug] [MainThread]: On master: COMMIT
+[0m16:04:34.209979 [debug] [MainThread]: SQL status: COMMIT in 0.0 seconds
+[0m16:04:34.210168 [debug] [MainThread]: On master: Close
+[0m16:04:34.210608 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m16:04:34.210790 [debug] [MainThread]: Connection 'test.plaid_de.test_ticket_sales_counts_are_valid' was properly closed.
+[0m16:04:34.211093 [info ] [MainThread]: 
+[0m16:04:34.211364 [info ] [MainThread]: Finished running 1 test in 0 hours 0 minutes and 0.31 seconds (0.31s).
+[0m16:04:34.211876 [debug] [MainThread]: Command end result
+[0m16:04:34.217387 [info ] [MainThread]: 
+[0m16:04:34.217716 [info ] [MainThread]: [32mCompleted successfully[0m
+[0m16:04:34.217954 [info ] [MainThread]: 
+[0m16:04:34.218211 [info ] [MainThread]: Done. PASS=1 WARN=0 ERROR=0 SKIP=0 TOTAL=1
+[0m16:04:34.218689 [debug] [MainThread]: Command `dbt test` succeeded at 16:04:34.218625 after 0.52 seconds
+[0m16:04:34.218938 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10c4def40>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e200ac0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e1f2040>]}
+[0m16:04:34.219194 [debug] [MainThread]: Flushing usage events
