@@ -104,7 +104,7 @@ max_1_transfer_and_non_circular_flights_with_travel_times AS (
 ) SELECT
     first_flight as first_flight_no,
     second_flight as second_flight_no,
-    first_departure_airport as origin_airport,
+    first_departure_airport as origin_airport_code,
     COALESCE(second_arrival_airport, first_arrival_airport) as destination_airport_code,
     CASE WHEN second_flight IS NOT NULL THEN first_arrival_airport END as transfer_airport_code,
     first_scheduled_departure_time as first_scheduled_departure_time,
