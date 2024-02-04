@@ -45,7 +45,7 @@ brew install dbt
 ```
 
 
-## How to query dbt output tables
+# How to query dbt output tables
 
 Note that the profiles.yml has the schema listed as `dbt`. You can see the tables listed in this schema using:
 
@@ -60,7 +60,7 @@ and then something like:
 select * from dbt.ticket_sales_counts limit 5;
 ```
 
-## How to run all tests
+# How to run all tests
 
 ```
 dbt test
