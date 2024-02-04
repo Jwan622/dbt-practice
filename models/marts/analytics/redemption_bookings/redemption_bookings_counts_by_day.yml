@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: redemption_bookings_counts_by_day
+    columns:
+      - name: redemption_count
+        tests:
+          - not_null
