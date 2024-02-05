@@ -945,7 +945,20 @@ and the resulting rows in my test schema make sense and are what I expect!
 ## Edge cases
 
 At sunday 10pm I just noticed flight `PG0109`. God dammit. Need to change my logic for routes. Holy god.
+In short, if an overnight flight occurs on the first leg, the flyer can only get second leg flights on the next day. So the first leg flys on day_of_week = 2 but it's an overnight, then the next flight has to be day_of_week = 3. We need to write logic to handle this.
 
+The first leg is an overnight if:
+```
+CASE WHEN first_scheduled_arrival_time - first_scheduled_departure_time < '00:00:00'::INTERVAL OR second_scheduled_departure_time - first_scheduled_arrival_time < '00:00:00'::INTERVAL 
+            THEN 1 ELSE 0 
+        END as is_first_flight_crossover_to_next_day,
+```
+
+In the event of an overnight, we can adjust the days_of_week array like so:
+
+```
+CASE WHEN is_first_flight_crossover_to_next_day = 1 THEN ARRAY(SELECT unnest(first_days_of_week) + 1) END AS first_days_of_week_adjusted_because_overnight,
+```
 Like... this is probably not a route because it takes off on Sat but there is no flight on sunday at GDX:
 
 ```
