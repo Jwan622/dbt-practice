@@ -2,6 +2,7 @@ version: 2
 
 models:
   - name: valid_and_bookable_routes
+    description: If there is a second flight, the flight number pairs should be unique.
     tests:
       - unique:
           column_name: "first_flight_no || '-' || second_flight_no"
@@ -9,8 +10,15 @@ models:
             where: "second_flight_no IS NOT NULL"
     columns:
       - name: first_flight_no
+        description: These should be unique if there is no second flight
         tests:
           - not_null
           - unique:
               config:
                 where: 'second_flight_no is null'
+      - name: travel_time
+        description: Ensure travel_time is within the range [00:00:00, 24:00:00]
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= '00:00:00'::time and travel_time <= '24:00:00'"
+
