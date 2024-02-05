@@ -25,4 +25,6 @@ models:
       - name: origin_airport_code
         tests:
           - not_null
-
+      - name: destination_airport_code
+        tests:
+          - not_null
