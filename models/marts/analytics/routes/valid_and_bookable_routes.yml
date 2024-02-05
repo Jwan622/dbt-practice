@@ -16,11 +16,11 @@ models:
           - unique:
               config:
                 where: 'second_flight_no is null'
-      - name: travel_time
+      - name: total_travel_time
         description: Ensure travel_time is within the range [00:00:00, 24:00:00]
         tests:
           - dbt_utils.expression_is_true:
-              expression: ">= '00:00:00'::time and travel_time <= '24:00:00'"
+              expression: ">= '00:00:00'::time and total_travel_time <= '24:00:00'"
           - not_null
       - name: origin_airport_code
         tests:
