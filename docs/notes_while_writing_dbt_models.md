@@ -885,7 +885,18 @@ max_1_transfer_and_non_circular_flights_with_travel_times AS ( -- god this sucke
         second_scheduled_arrival_time,
         first_days_of_week,
         second_days_of_week,
-        CASE WHEN is_first_flight_crossover_to_next_day = 1 THEN ARRAY(SELECT unnest(first_days_of_week) + 1) END AS first_days_of_week_adjusted_because_overnight,
+        CASE
+          WHEN is_first_flight_crossover_to_next_day = 1 
+          THEN
+            ARRAY(
+              SELECT
+                CASE
+                  WHEN day = 7 THEN 1 -- when we add 7 + 1... the day actually becomes 1
+                  ELSE day + 1
+                END
+              FROM unnest(first_days_of_week) AS day
+            )
+        END AS first_days_of_week_adjusted_because_overnight,
         COALESCE(first_duration, '00:00:00'::INTERVAL) + COALESCE(layover_duration, '00:00:00'::INTERVAL) + COALESCE(second_duration, '00:00:00'::INTERVAL) as total_travel_time
     FROM max_1_transfer_and_non_circular_flights_with_travel_times
     WHERE first_duration + layover_duration + second_duration <= INTERVAL '24 HOURS'

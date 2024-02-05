@@ -6,7 +6,7 @@ name: Update table of contents
 on:
   push:
     branches: [main]
-    paths: ['README.md']
+    paths: ['README_from_plaid.md']
 
 jobs:
   build:
