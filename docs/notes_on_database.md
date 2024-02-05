@@ -270,7 +270,7 @@ CREATE VIEW aircrafts AS
 ```
 
 
-
+## Relationships
 bookings -> tickets via `book_ref` foreign key
 tickets -> boarding_passes via `ticket_no` foreign key
 boarding_passes -> flights via `flight_id` foreign key

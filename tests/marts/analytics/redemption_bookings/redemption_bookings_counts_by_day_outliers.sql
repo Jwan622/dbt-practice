@@ -13,7 +13,7 @@ WITH redemption_stats AS (
         redemption_count,
         AVG(redemption_count) OVER () AS mean_redemption_count,
         STDDEV_POP(redemption_count) OVER () AS std_dev_redemption_count
-    FROM dbt.redemption_bookings_counts_by_day
+    FROM {{ ref('redemption_bookings_counts_by_day') }}
 )
 SELECT
     'Redemption count be wildin, there are too many!' AS test,

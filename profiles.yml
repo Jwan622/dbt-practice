@@ -5,7 +5,7 @@ plaid-de:
       host: localhost
       password: plaid
       port: 5438
-      schema: dbt
+      schema: analytics
       threads: 4
       timeout_seconds: 300
       type: postgres

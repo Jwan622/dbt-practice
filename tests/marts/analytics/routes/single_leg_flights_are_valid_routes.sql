@@ -11,7 +11,7 @@ with are_there_single_leg_flights_or_not as (
             WHEN SUM(CASE WHEN second_flight_no IS NULL THEN 1 ELSE 0 END) > 0 THEN 'Column has null values'
             ELSE 'Column is always non-null'
         END AS test_result
-    FROM dbt.valid_and_bookable_routes
+    FROM {{ ref('valid_and_bookable_routes') }}
 )
 SELECT *
 FROM are_there_single_leg_flights_or_not

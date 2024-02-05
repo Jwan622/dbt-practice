@@ -15,7 +15,7 @@ WITH actual_vs_expected_ticket_sales AS (
     SUM(tsc.daily_total_tickets) OVER (
         ORDER BY tsc.date ASC ROWS BETWEEN 27 PRECEDING AND CURRENT ROW
     ) AS expected_28d_total
-    FROM dbt.ticket_sales_counts tsc
+    FROM {{ ref('ticket_sales_counts') }} tsc
 )
 SELECT
     '7-day rolling total matches daily_total_tickets sum for last 7 days' AS test,

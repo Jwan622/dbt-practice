@@ -270,6 +270,26 @@ range               | 7900
     ORDER BY redemption_count desc
 ```
 
+LOL... I did one last quick eyeball check and found these values in the `bookings` table:
+
+```
+select distinct total_amount from bookings order by total_amount DESC;
+```
+
+results:
+
+```
+total_amount
+--------------
+  99999999.00
+  88888888.00
+   1204500.00
+   1116700.00
+```
+
+I think those are probably outliers too used to signify a dud redemption. I might add those.
+
+
 
 ## Valid and bookable routes
 
