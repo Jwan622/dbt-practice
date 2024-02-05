@@ -3,6 +3,9 @@ version: 2
 models:
   - name: ticket_sales_counts
     columns:
+      - name: date
+        tests:
+          - unique
       - name: daily_total_tickets
         tests:
           - not_null

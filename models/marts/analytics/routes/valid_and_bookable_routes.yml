@@ -2,7 +2,15 @@ version: 2
 
 models:
   - name: valid_and_bookable_routes
+    tests:
+      - unique:
+          column_name: "first_flight_no || '-' || second_flight_no"
+          config:
+            where: "second_flight_no IS NOT NULL"
     columns:
       - name: first_flight_no
         tests:
           - not_null
+          - unique:
+              config:
+                where: 'second_flight_no is null'
