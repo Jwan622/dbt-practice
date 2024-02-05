@@ -21,4 +21,8 @@ models:
         tests:
           - dbt_utils.expression_is_true:
               expression: ">= '00:00:00'::time and travel_time <= '24:00:00'"
+          - not_null
+      - name: origin_airport_code
+        tests:
+          - not_null
 

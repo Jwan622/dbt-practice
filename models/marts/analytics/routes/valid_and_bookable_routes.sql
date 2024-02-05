@@ -99,7 +99,7 @@ max_1_transfer_and_non_circular_flights_with_travel_times AS (
         first_scheduled_arrival_time,
         second_scheduled_departure_time,
         second_scheduled_arrival_time,
-        normalized_first_leg + normalized_second_leg + normalized_third_leg as travel_time
+        COALESCE(normalized_first_leg, '00:00:00'::INTERVAL) + COALESCE(normalized_second_leg, '00:00:00'::INTERVAL) + COALESCE(normalized_third_leg, '00:00:00'::INTERVAL) as travel_time
     FROM max_1_transfer_and_non_circular_flights_with_travel_times
     WHERE normalized_first_leg + normalized_second_leg + normalized_third_leg <= INTERVAL '24 HOURS'
     OR second_flight is null -- I think we still want all of the single leg flights too since they're valid by the README rules
