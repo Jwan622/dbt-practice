@@ -3,7 +3,7 @@
 These are notes I took for myself while writing the models. Also, I left some questions I need to answer for myself that came up over the course of development of the dbt models
 
 ## Ticket Sales models
-- I threw all the info in one model and it passed the eyeball test. This was more straightforward. Writing the tests were a bit harder.
+- I threw all the info in one model and it passed the eyeball test. This was more straightforward. Writing the tests were a bit harder. Incorporated some dbt_utils tests.
 
 ### Results for Ticket Sales Query
 
@@ -121,6 +121,8 @@ rolling_28_days_total | 3994
 
 **Quick eyeball check**: Eyeballing and doing the math by hand at day 2, day 7, and day 8 makes me confident that this query is correct.
 
+
+___
 
 ## Redemptions
 When I enter the container and connect to the postgres instance (notes in the docs folder on how to do this), and run:
@@ -270,6 +272,10 @@ range               | 7900
     ORDER BY redemption_count desc
 ```
 
+
+**AMENDMENT**
+
+Y'all are tricky.
 LOL... I did one last quick eyeball check and found these values in the `bookings` table:
 
 ```
@@ -287,13 +293,17 @@ total_amount
    1116700.00
 ```
 
-I think those are probably outliers too used to signify a dud redemption. I might add those.
+I think those are probably outliers too used to signify a redemption. I might add those.... but I might not since they are outlierishly high. Why would those be redemptions. I'm actually not sure how to treat those values tbh.
 
 
+### Additional thoughts about Redemption Bookings
+I wrote an outlier test that I think is useful. When that fails on a day when we run this model incrementally (even though we're doing full refreshes right now), it'd be nice if it sent a slack messages to an alerts channel. If there is an outlierishly high redemption for a day... perhaps we wrote a bug enabling too many redemptions.
 
+
+____
 ## Valid and bookable routes
 
-Harder problem here....mainly because I was unclear what the question was asking. But by inspecting the data, I think I figured out what it meant!
+Harder problem here....mainly because I was unclear what the question was asking. I screwed it up the first time. But by inspecting the data, I think I figured out what the question meant!
 
 ### The routes view
 Before we tackle the data...let's try to understand the routes view query a bit better in the postgres dump file.
@@ -338,7 +348,7 @@ flight_no | departure_airport | arrival_airport | aircraft_code | duration | sch
  PG0006    | PKV               | DME             | CN1           | 02:05:00 | 14:20:00            | 16:25:00          |            1
 ```
 
-And then finally f3 `array_aggs` the days of the week together. Notice it does not `GROUP BY` the days of the week column so that `array_agg` function can aggregate the days of the week the routes fly.
+And then finally f3 `array_aggs` the days of the week together. Notice it does not `GROUP BY` the days of the week column so that `array_agg` function can aggregate the days of the week the routes fly. I noticed at first the departure and arrival times didn't have days and so I stupidly assumped  these flights flew daily. I completely missed the `days_of_week` column the first time around so had to adjust my code.
 
 https://www.postgresqltutorial.com/postgresql-aggregate-functions/postgresql-array_agg/
 
@@ -390,11 +400,15 @@ select count(1) from routes;
 (1 row)
 ```
 
+Those are 710 individual routes. That's going to balloon when we make transfer routes from them.
+
 ### Questions
 Quite a few questions and slight gotchas came up on this. I'll tackle one at a time.
 
-- What does max one transfer mean?
-- Do some routes start and end at the same airport?
+- What does max one transfer mean? Should we include single-leg flights? I made the decision to include non-transfer routes as valid routes.
+- Do some routes start and end at the same airport ever? Or do you mean in transfer flights... a valid route cannot start and end in the same city. But isn't that just a RT flight? Isn't that a valid route?
+- When we crossover the next day... the transfer flight has to be on a day later right? I actually couldn't find any in the dataset but I did adjust my code to account for this. This part was tricky.
+- I included layover times in the 24h total_travel_time calculation. That was the time between the second flight's departure time and the first flight's arrival time. Is that right?
 
 ____
 First the issue of **max** one transfer. My approach was to join on routes twice so we can check if the 2nd transfer is NULL. I did something like this:
@@ -442,76 +456,30 @@ WHERE departure_airport NOT IN (SELECT DISTINCT arrival_airport FROM routes)
 (0 rows)
 ```
 
-So there are no departure airports that are not arrival airports in the routes view. Dammit.
+So there are no departure airports that are not arrival airports in the routes view. Dammit. So my query is wrong.
 
 Okay so I think I understood the question wrong. The "max" part of that question just means limit your universe of potential routes to just 1 transfer routes or 0 transfer routes even though there are definitely transfer routes with 2 or 3 hops. You can actually have infinite transfers. There are no orphan destinations.
 
 I created a test schema named `jwan` and some dummy tables in the schema to play around with so I can be more sure of my queries.
 my test table:
 ```
- flight_no | departure_airport |      departure_airport_name      | departure_city | arrival_airport |       arrival_airport_name       | arrival_city | aircraft_code | scheduled_departure | scheduled_arrival | duration |  days_of_week
------------+-------------------+----------------------------------+----------------+-----------------+----------------------------------+--------------+---------------+---------------------+-------------------+----------+-----------------
- PG0001    | UIK               | Ust-Ilimsk Airport               | Ust Ilimsk     | SGC             | Surgut Airport                   | Surgut       | CR2           | 12:15:00            | 14:35:00          | 02:20:00 | {6}
- PG0002    | SGC               | Surgut Airport                   | Surgut         | UIK             | Ust-Ilimsk Airport               | Ust Ilimsk   | CR2           | 07:10:00            | 09:30:00          | 02:20:00 | {7}
- PG0003    | IWA               | Ivanovo South Airport            | Ivanovo        | AER             | Sochi International Airport      | Sochi        | CR2           | 06:50:00            | 09:00:00          | 02:10:00 | {2,6}
- PG0004    | AER               | Sochi International Airport      | Sochi          | IWA             | Ivanovo South Airport            | Ivanovo      | CR2           | 09:45:00            | 11:55:00          | 02:10:00 | {3,7}
- PG0005    | DME               | Domodedovo International Airport | Moscow         | PKV             | Pskov Airport                    | Pskov        | CN1           | 12:40:00            | 14:45:00          | 02:05:00 | {2,5,7}
- PG0006    | PKV               | Pskov Airport                    | Pskov          | DME             | Domodedovo International Airport | Moscow       | CN1           | 14:20:00            | 16:25:00          | 02:05:00 | {1,4,6}
- PG0007    | VKO               | Vnukovo International Airport    | Moscow         | JOK             | Yoshkar-Ola Airport              | Yoshkar-Ola  | CN1           | 09:40:00            | 11:50:00          | 02:10:00 | {1,2,3,4,5,6,7}
- PG0008    | VKO               | Vnukovo International Airport    | Moscow         | JOK             | Yoshkar-Ola Airport              | Yoshkar-Ola  | CN1           | 08:45:00            | 10:55:00          | 02:10:00 | {1,2,3,4,5,6,7}
- PG0009    | JOK               | Yoshkar-Ola Airport              | Yoshkar-Ola    | VKO             | Vnukovo International Airport    | Moscow       | CN1           | 09:10:00            | 11:20:00          | 02:10:00 | {1,2,3,4,5,6,7}
- PG0010    | JOK               | Yoshkar-Ola Airport              | Yoshkar-Ola    | VKO             | Vnukovo International Airport    | Moscow       | CN1           | 09:25:00            | 11:35:00          | 02:10:00 | {1,2,3,4,5,6,7}
-(10 rows)
-
-(END)
+  flight_no | departure_airport |      departure_airport_name      | departure_city  | arrival_airport |        arrival_airport_name        | arrival_city | aircraft_code | scheduled_departure | scheduled_arrival | duration |  days_of_week
+-----------+-------------------+----------------------------------+-----------------+-----------------+------------------------------------+--------------+---------------+---------------------+-------------------+----------+-----------------
+ PG0300    | ESL               | Elista Airport                   | Elista          | SVO             | Sheremetyevo International Airport | Moscow       | CN1           | 08:20:00            | 12:10:00          | 03:50:00 | {1,2,3,4,5,6,7}
+ PG0033    | ESL               | Elista Airport                   | Elista          | GDZ             | Gelendzhik Airport                 | Gelendzhik   | CN1           | 13:50:00            | 15:35:00          | 01:45:00 | {2,6}
+ PG0007    | VKO               | Vnukovo International Airport    | Moscow          | JOK             | Yoshkar-Ola Airport                | Yoshkar-Ola  | CN1           | 09:40:00            | 11:50:00          | 02:10:00 | {1,2,3,4,5,6,7}
+ PG0109    | MRV               | Mineralnyye Vody Airport         | Mineralnye Vody | GDX             | Sokol Airport                      | Magadan      | 763           | 17:30:00            | 02:15:00          | 08:45:00 | {7}
+ PG0267    | GDX               | Sokol Airport                    | Magadan         | IKT             | Irkutsk Airport                    | Irkutsk      | SU9           | 07:05:00            | 11:00:00          | 03:55:00 | {3,7}
+ PG0208    | DME               | Domodedovo International Airport | Moscow          | KHV             | Khabarovsk-Novy Airport            | Khabarovsk   | 763           | 17:40:00            | 01:40:00          | 08:00:00 | {1,2,3,4,5,6,7}
+ PG0705    | SCW               | Syktyvkar Airport                | Syktyvkar       | GDX             | Sokol Airport                      | Magadan      | 763           | 17:45:00            | 00:10:00          | 06:25:00 | {7}
+ PG0088    | KHV               | Khabarovsk-Novy Airport          | Khabarovsk      | DYR             | Ugolny Airport                     | Anadyr       | 319           | 00:20:00            | 04:25:00          | 04:05:00 | {6}
+ PG0012    | GDZ               | Gelendzhik Airport               | Gelendzhik      | VKO             | Vnukovo International Airport      | Moscow       | CR2           | 07:55:00            | 09:40:00          | 01:45:00 | {2,4,6}
+ PG0034    | GDZ               | Gelendzhik Airport               | Gelendzhik      | ESL             | Elista Airport                     | Elista       | CN1           | 08:25:00            | 10:10:00          | 01:45:00 | {3,7}
+ PG0049    | VKO               | Vnukovo International Airport    | Moscow          | GDZ             | Gelendzhik Airport                 | Gelendzhik   | CR2           | 10:05:00            | 11:50:00          | 01:45:00 | {2,5,7}
+(11 rows)
 ```
 
-It has just 10 rows. **But the thing to note here is that PG0007 and PG0008 share the same departure airport (VOK) and arrival airport (JOK) but the scheduled_departure and scheduled_arrival are different.** Those are 2 different routes... or least that's the assumption I'm making. Same goes for PG0009 and PG0010. 
-
-But I think these should go away when we account for circular routes.
-
-For 1 transfer routes:
-```
- SELECT
-        route1.flight_no AS first_flight,
-        route2.flight_no AS second_flight,
-        route1.departure_airport AS first_departure_airport,
-        route1.arrival_airport AS first_arrival_airport,
-        route2.departure_airport AS second_departure_airport,
-        route2.arrival_airport AS second_arrival_airport,
-        route1.scheduled_departure as first_scheduled_departure_time,
-        route2.scheduled_departure as second_scheduled_departure_time,
-        route1.scheduled_arrival as first_scheduled_arrival_time,
-        route2.scheduled_arrival as second_scheduled_arrival_time
-    FROM jwan.test_routes AS route1
-    LEFT OUTER JOIN jwan.test_routes AS route2
-    ON route1.arrival_airport = route2.departure_airport
-;
-```
-
-which returned me this:
-
-```
-first_flight | second_flight | first_departure_airport | first_arrival_airport | second_departure_airport | second_arrival_airport | first_scheduled_departure_time | second_scheduled_departure_time | first_scheduled_arrival_time | second_scheduled_arrival_time
---------------+---------------+-------------------------+-----------------------+--------------------------+------------------------+--------------------------------+---------------------------------+------------------------------+-------------------------------
- PG0001       | PG0002        | UIK                     | SGC                   | SGC                      | UIK                    | 12:15:00                       | 07:10:00                        | 14:35:00                     | 09:30:00
- PG0002       | PG0001        | SGC                     | UIK                   | UIK                      | SGC                    | 07:10:00                       | 12:15:00                        | 09:30:00                     | 14:35:00
- PG0003       | PG0004        | IWA                     | AER                   | AER                      | IWA                    | 06:50:00                       | 09:45:00                        | 09:00:00                     | 11:55:00
- PG0004       | PG0003        | AER                     | IWA                   | IWA                      | AER                    | 09:45:00                       | 06:50:00                        | 11:55:00                     | 09:00:00
- PG0005       | PG0006        | DME                     | PKV                   | PKV                      | DME                    | 12:40:00                       | 14:20:00                        | 14:45:00                     | 16:25:00
- PG0006       | PG0005        | PKV                     | DME                   | DME                      | PKV                    | 14:20:00                       | 12:40:00                        | 16:25:00                     | 14:45:00
- PG0007       | PG0010        | VKO                     | JOK                   | JOK                      | VKO                    | 09:40:00                       | 09:25:00                        | 11:50:00                     | 11:35:00
- PG0007       | PG0009        | VKO                     | JOK                   | JOK                      | VKO                    | 09:40:00                       | 09:10:00                        | 11:50:00                     | 11:20:00
- PG0008       | PG0010        | VKO                     | JOK                   | JOK                      | VKO                    | 08:45:00                       | 09:25:00                        | 10:55:00                     | 11:35:00
- PG0008       | PG0009        | VKO                     | JOK                   | JOK                      | VKO                    | 08:45:00                       | 09:10:00                        | 10:55:00                     | 11:20:00
- PG0009       | PG0008        | JOK                     | VKO                   | VKO                      | JOK                    | 09:10:00                       | 08:45:00                        | 11:20:00                     | 10:55:00
- PG0009       | PG0007        | JOK                     | VKO                   | VKO                      | JOK                    | 09:10:00                       | 09:40:00                        | 11:20:00                     | 11:50:00
- PG0010       | PG0008        | JOK                     | VKO                   | VKO                      | JOK                    | 09:25:00                       | 08:45:00                        | 11:35:00                     | 10:55:00
- PG0010       | PG0007        | JOK                     | VKO                   | VKO                      | JOK                    | 09:25:00                       | 09:40:00                        | 11:35:00                     | 11:50:00
-(14 rows)
-
-(END)
-```
+It has just 10 rows. **But the thing to note here is that MRV -> GDX is an overnight flight into the next day so any connecting in GDX will have to start one day later to be a valid route. Also, there are some invalid routes because they start and end in the same city like ESL > GDZ > ESL. **  
 
 ____
 So I know the `README.md` says "A bookable route cannot start and end at the same airport." but does this mean routes with a transfer or for a single leg? Do single leg routes that start and end in a single airport even exist? Do routes with a transfer that start and end at the same airport count as a valid because they stopped somewhere else in the middle? Let's check:
@@ -530,7 +498,7 @@ count
      0
 (1 row)
 ```
-Since there are none, I think that requirement actually refers to routes with a transfer that start and end at the same airport. I think that's not a valid route. Let's see how many of those exist. But why is that not a valid route? Who knows... maybe that's just to ensure people don't fly somewhere and come right back home the same day. But isn't that a round-trip ticket? Isn't that route valid? Oh well....nvm. I wish I could eliminate same day rount trips but the timestamps are just `time` without a date!
+Since there are none, I think that requirement actually refers to routes with a transfer that start and end at the same airport. I think that's not a valid route. Let's see how many of those exist. But why is that not a valid route? Who knows... maybe that's just to ensure people don't fly somewhere and come right back home the same day. But isn't that a round-trip ticket? Isn't that route valid? Oh well....nvm. I wish I could eliminate same day count trips but the timestamps are just `time` without a date!
 
 In order to see if I'm doing this correctly, let's create some data:
 
@@ -575,6 +543,7 @@ insert into jwan.test_routes select * from routes where flight_no = 'PG0705';
 insert into jwan.test_routes select * from routes where flight_no = 'PG0088';
 ```
 
+Final test data:
 ```
  flight_no | departure_airport |      departure_airport_name      | departure_city  | arrival_airport |        arrival_airport_name        | arrival_city | aircraft_code | scheduled_departure | scheduled_arrival | duration |  days_of_week
 -----------+-------------------+----------------------------------+-----------------+-----------------+------------------------------------+--------------+---------------+---------------------+-------------------+----------+-----------------
@@ -592,7 +561,7 @@ insert into jwan.test_routes select * from routes where flight_no = 'PG0088';
 (11 rows)
 ```
 
-When we run our query we get this which looks right:
+When we run our final query we get this which looks right:
 
 ```
 bookings=# WITH no_transfer_flights AS (
@@ -617,178 +586,6 @@ bookings=# WITH no_transfer_flights AS (
 Main point of this QA: We'd expect the GDZ -> VKO -> GDZ route to **not** be included and we expect the GDZ -> ESL -> GDZ route to *not* be included but we'd expect to see the GDZ -> ESL -> SVO route.
 
 ### Our final test sql code against our schema
-
-```
-WITH no_transfer_flights AS (
-    SELECT
-        route1.flight_no AS first_flight,
-        NULL AS second_flight,
-        route1.departure_airport AS first_departure_airport,
-        route1.arrival_airport AS first_arrival_airport,
-        NULL AS second_departure_airport,
-        NULL AS second_arrival_airport,
-        route1.scheduled_departure as first_scheduled_departure_time,
-        route1.scheduled_arrival as first_scheduled_arrival_time,
-        NULL::time without time zone as second_scheduled_departure_time,
-        NULL::time without time zone as second_scheduled_arrival_time
-    FROM jwan.test_routes AS route1
-),
-one_transfer_flights AS (
-    SELECT
-        route1.flight_no AS first_flight,
-        route2.flight_no AS second_flight,
-        route1.departure_airport AS first_departure_airport,
-        route1.arrival_airport AS first_arrival_airport,
-        route2.departure_airport AS second_departure_airport,
-        route2.arrival_airport AS second_arrival_airport,
-        route1.scheduled_departure as first_scheduled_departure_time,
-        route1.scheduled_arrival as first_scheduled_arrival_time,
-        route2.scheduled_departure as second_scheduled_departure_time,
-        route2.scheduled_arrival as second_scheduled_arrival_time
-    FROM jwan.test_routes AS route1
-    LEFT OUTER JOIN jwan.test_routes AS route2
-    ON route1.arrival_airport = route2.departure_airport
-),
-max_1_transfer_and_non_circular_flights AS (
-  SELECT
-    first_flight,
-    second_flight,
-    first_departure_airport,
-    first_arrival_airport,
-    second_departure_airport,
-    second_arrival_airport,
-    first_scheduled_departure_time,
-    first_scheduled_arrival_time,
-    second_scheduled_departure_time,
-    second_scheduled_arrival_time
-  FROM one_transfer_flights
-  WHERE first_departure_airport <> second_arrival_airport -- non-circular
-  UNION ALL
-  SELECT
-    first_flight,
-    second_flight,
-    first_departure_airport,
-    first_arrival_airport,
-    second_departure_airport,
-    second_arrival_airport,
-    first_scheduled_departure_time,
-    first_scheduled_arrival_time,
-    second_scheduled_departure_time,
-    second_scheduled_arrival_time
-  FROM no_transfer_flights
-),
-max_1_transfer_and_non_circular_flights_with_travel_times AS (
-    SELECT 
-        first_flight,
-        second_flight,
-        first_departure_airport,
-        first_arrival_airport,
-        second_departure_airport,
-        second_arrival_airport,
-        first_scheduled_departure_time,
-        first_scheduled_arrival_time,
-        second_scheduled_departure_time,
-        second_scheduled_arrival_time,
-        CASE WHEN first_scheduled_arrival_time - first_scheduled_departure_time < '00:00:00'::INTERVAL
-            THEN first_scheduled_arrival_time - first_scheduled_departure_time + INTERVAL '24 HOURS' 
-            ELSE first_scheduled_arrival_time - first_scheduled_departure_time 
-        END as normalized_first_leg,
-        CASE WHEN second_scheduled_departure_time - first_scheduled_arrival_time < '00:00:00'::INTERVAL
-            THEN second_scheduled_departure_time - first_scheduled_arrival_time + INTERVAL '24 HOURS' 
-            ELSE second_scheduled_departure_time - first_scheduled_arrival_time 
-        END as normalized_second_leg,
-        CASE WHEN second_scheduled_arrival_time - second_scheduled_departure_time < '00:00:00'::INTERVAL 
-            THEN second_scheduled_arrival_time - second_scheduled_departure_time + INTERVAL '24 HOURS' 
-            ELSE second_scheduled_arrival_time - second_scheduled_departure_time 
-        END as normalized_third_leg
-    FROM max_1_transfer_and_non_circular_flights
-), max_1_transfer_and_non_circular_flights_within_24hours AS (
-    SELECT 
-        first_flight,
-        second_flight,
-        first_departure_airport,
-        first_arrival_airport,
-        second_departure_airport,
-        second_arrival_airport,
-        first_scheduled_departure_time,
-        first_scheduled_arrival_time,
-        second_scheduled_departure_time,
-        second_scheduled_arrival_time
-    FROM max_1_transfer_and_non_circular_flights_with_travel_times
-    WHERE normalized_first_leg + normalized_second_leg + normalized_third_leg <= INTERVAL '24 HOURS'
-) SELECT
-    first_flight as first_flight_no,
-    second_flight as second_flight_no,
-    first_departure_airport as origin_airport,
-    COALESCE(second_arrival_airport, first_arrival_airport) as destination_airport_code,
-    CASE WHEN second_flight IS NOT NULL THEN first_arrival_airport END as transfer_airport_code,
-    first_scheduled_departure_time as first_scheduled_departure_time,
-    CASE WHEN second_flight IS NOT NULL THEN first_scheduled_arrival_time END as transfer_airport_arrival_time,
-    CASE WHEN second_flight IS NOT NULL THEN second_scheduled_departure_time END as transfer_airport_departure_time,
-    COALESCE(second_scheduled_arrival_time, first_scheduled_arrival_time) as destination_arrival_time
-FROM max_1_transfer_and_non_circular_flights_within_24hours AS valid_routes
-```
-
-It uses our `jwan.test_routes` table.
-
-__ 
-3. Dealing with time requirement of <= 24 hours was tricky.
-
-I basically took the 3 legs, normalized them by doing arrival_time - departure_time and adding 24 hours if it was negative. I add up the 3 legs and if they're less than or equal to 24 hours, we take those rows.
-```
-max_1_transfer_and_non_circular_flights_with_travel_times AS (
-    SELECT 
-        first_flight,
-        second_flight,
-        first_departure_airport,
-        first_arrival_airport,
-        second_departure_airport,
-        second_arrival_airport,
-        first_scheduled_departure_time,
-        first_scheduled_arrival_time,
-        second_scheduled_departure_time,
-        second_scheduled_arrival_time,
-        CASE WHEN first_scheduled_arrival_time - first_scheduled_departure_time < '00:00:00'::INTERVAL
-            THEN first_scheduled_arrival_time - first_scheduled_departure_time + INTERVAL '24 HOURS' 
-            ELSE first_scheduled_arrival_time - first_scheduled_departure_time 
-        END as normalized_first_leg,
-        CASE WHEN second_scheduled_departure_time - first_scheduled_arrival_time < '00:00:00'::INTERVAL
-            THEN second_scheduled_departure_time - first_scheduled_arrival_time + INTERVAL '24 HOURS' 
-            ELSE second_scheduled_departure_time - first_scheduled_arrival_time 
-        END as normalized_second_leg,
-        CASE WHEN second_scheduled_arrival_time - second_scheduled_departure_time < '00:00:00'::INTERVAL 
-            THEN second_scheduled_arrival_time - second_scheduled_departure_time + INTERVAL '24 HOURS' 
-            ELSE second_scheduled_arrival_time - second_scheduled_departure_time 
-        END as normalized_third_leg
-    FROM max_1_transfer_and_non_circular_flights
-), max_1_transfer_and_non_circular_flights_within_24hours AS (
-    SELECT 
-        first_flight,
-        second_flight,
-        first_departure_airport,
-        first_arrival_airport,
-        second_departure_airport,
-        second_arrival_airport,
-        first_scheduled_departure_time,
-        first_scheduled_arrival_time,
-        second_scheduled_departure_time,
-        second_scheduled_arrival_time
-    FROM max_1_transfer_and_non_circular_flights_with_travel_times
-    WHERE normalized_first_leg + normalized_second_leg + normalized_third_leg <= INTERVAL '24 HOURS'
-)
-```
-results in my test schema:
-
-```
- first_flight | second_flight | first_departure_airport | first_arrival_airport | second_departure_airport | second_arrival_airport | first_scheduled_departure_time | first_scheduled_arrival_time | second_scheduled_departure_time | second_scheduled_arrival_time | normalized_first_leg | normalized_second_leg | normalized_third_leg
---------------+---------------+-------------------------+-----------------------+--------------------------+------------------------+--------------------------------+------------------------------+---------------------------------+-------------------------------+----------------------+-----------------------+----------------------
- PG0012       | PG0007        | GDZ                     | VKO                   | VKO                      | JOK                    | 07:55:00                       | 09:40:00                     | 09:40:00                        | 11:50:00                      | 01:45:00             | 00:00:00              | 02:10:00
- PG0033       | PG0012        | ESL                     | GDZ                   | GDZ                      | VKO                    | 13:50:00                       | 15:35:00                     | 07:55:00                        | 09:40:00                      | 01:45:00             | 16:20:00              | 01:45:00
-(2 rows)
-```
-Passes the eyeball test.
-
-
 
 Final test model:
 
@@ -970,12 +767,34 @@ FROM max_1_transfer_and_non_circular_flights_within_24hours_with_adjusted_days_o
 WHERE array_length(days_of_week, 1) IS NOT NULL
 ```
 
-and the resulting rows in my test schema make sense and are what I expect!
+It uses our `jwan.test_routes` table.
 
+results:
+
+```
+ first_flight_no | second_flight_no | origin_airport_code | destination_airport_code | transfer_airport_code | first_scheduled_departure_time | transfer_airport_arrival_time | transfer_airport_departure_time | destination_arrival_time |  days_of_week   | total_travel_time
+-----------------+------------------+---------------------+--------------------------+-----------------------+--------------------------------+-------------------------------+---------------------------------+--------------------------+-----------------+-------------------
+ PG0012          | PG0007           | GDZ                 | JOK                      | VKO                   | 07:55:00                       | 09:40:00                      | 09:40:00                        | 11:50:00                 | {2,4,6}         | 03:55:00
+ PG0300          |                  | ESL                 | SVO                      |                       | 08:20:00                       |                               |                                 | 12:10:00                 | {1,2,3,4,5,6,7} | 03:50:00
+ PG0033          |                  | ESL                 | GDZ                      |                       | 13:50:00                       |                               |                                 | 15:35:00                 | {2,6}           | 01:45:00
+ PG0007          |                  | VKO                 | JOK                      |                       | 09:40:00                       |                               |                                 | 11:50:00                 | {1,2,3,4,5,6,7} | 02:10:00
+ PG0109          |                  | MRV                 | GDX                      |                       | 17:30:00                       |                               |                                 | 02:15:00                 | {7}             | 08:45:00
+ PG0267          |                  | GDX                 | IKT                      |                       | 07:05:00                       |                               |                                 | 11:00:00                 | {3,7}           | 03:55:00
+ PG0208          |                  | DME                 | KHV                      |                       | 17:40:00                       |                               |                                 | 01:40:00                 | {1,2,3,4,5,6,7} | 08:00:00
+ PG0705          |                  | SCW                 | GDX                      |                       | 17:45:00                       |                               |                                 | 00:10:00                 | {7}             | 06:25:00
+ PG0088          |                  | KHV                 | DYR                      |                       | 00:20:00                       |                               |                                 | 04:25:00                 | {6}             | 04:05:00
+ PG0012          |                  | GDZ                 | VKO                      |                       | 07:55:00                       |                               |                                 | 09:40:00                 | {2,4,6}         | 01:45:00
+ PG0034          |                  | GDZ                 | ESL                      |                       | 08:25:00                       |                               |                                 | 10:10:00                 | {3,7}           | 01:45:00
+ PG0049          |                  | VKO                 | GDZ                      |                       | 10:05:00                       |                               |                                 | 11:50:00                 | {2,5,7}         | 01:45:00
+(12 rows)
+```
+__ 
+
+Flights like GDZ -> ESL -> SVO were eliminated because they took too long. This one's layover takes it over the 24h mark. Same with VKO -> GDZ -> ESL. the day is viable on the 3rd but the flight time is too long.
 
 ## Edge cases
 
-At sunday 10pm I just noticed flight `PG0109`. God dammit. Need to change my logic for routes. Holy god.
+At sunday 10pm, I just noticed flight `PG0109`. God dammit. Need to change my logic for routes. Holy god.
 In short, if an overnight flight occurs on the first leg, the flyer can only get second leg flights on the next day. So the first leg flys on day_of_week = 2 but it's an overnight, then the next flight has to be day_of_week = 3. We need to write logic to handle this.
 
 The first leg is an overnight if:
