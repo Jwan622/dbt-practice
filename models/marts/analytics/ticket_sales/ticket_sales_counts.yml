@@ -9,12 +9,18 @@ models:
       - name: daily_total_tickets
         tests:
           - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
       - name: rolling_7_days_total
         tests:
           - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
       - name: rolling_28_days_total
         tests:
           - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
       - name: date
         tests:
           - not_null

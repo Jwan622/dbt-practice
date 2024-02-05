@@ -3,11 +3,11 @@
 These are notes I took for myself while writing the models. Also, I left some questions I need to answer for myself that came up over the course of development of the dbt models
 
 ## Ticket Sales models
-- What's the diff between extract and date_trunc functions for getting the day. Which do I want and why.
+- I threw all the info in one model and it passed the eyeball test. This was more straightforward. Writing the tests were a bit harder.
 
 ### Results for Ticket Sales Query
 
-It seemed odd to me that the daily total tickets increased over time which made me believe I was accidentally aggregating instead of just counting tickets day by day... but it seems to checkout when I run simple where queries. Below are the results for day 2 and 3:
+It seemed odd to me that the daily total tickets increased over time which made me believe I was accidentally aggregating instead of just counting tickets day by day... but it seems to checkout when I run simple `where` queries. Below are the results for day 2 and 3:
 
 ```postgresql
 bookings=# select * from bookings where DATE_TRUNC('day',book_date) = '2017-04-22'
