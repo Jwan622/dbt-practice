@@ -23,8 +23,8 @@ SELECT
     mean_daily_total_tickets,
     std_dev_daily_total_tickets,
     CASE
-        WHEN daily_total_tickets > mean_daily_total_tickets + 2 * std_dev_daily_total_tickets THEN 'Outlier'
+        WHEN daily_total_tickets > {{ calculate_threshold('mean_daily_total_tickets', 'std_dev_daily_total_tickets', 3) }} THEN 'Outlier'
         ELSE 'Not an outlier'
     END AS outlier_status
 FROM ticket_sales_stats_last_60d
-WHERE daily_total_tickets < mean_daily_total_tickets - 2 * std_dev_daily_total_tickets
+WHERE daily_total_tickets < {{ calculate_threshold('mean_daily_total_tickets', 'std_dev_daily_total_tickets', 3) }}

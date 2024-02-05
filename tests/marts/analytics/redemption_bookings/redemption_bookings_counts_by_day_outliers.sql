@@ -22,8 +22,8 @@ SELECT
     mean_redemption_count,
     std_dev_redemption_count,
     CASE
-        WHEN redemption_count > mean_redemption_count + 2 * std_dev_redemption_count THEN 'Outlier'
+        WHEN redemption_count > {{ calculate_threshold('mean_redemption_count', 'std_dev_redemption_count', 2) }} THEN 'Outlier'
         ELSE 'Not an outlier'
     END AS outlier_status
 FROM redemption_stats
-WHERE redemption_count > mean_redemption_count + 2 * std_dev_redemption_count
+WHERE redemption_count > {{ calculate_threshold('mean_redemption_count', 'std_dev_redemption_count', 2) }}
