@@ -818,3 +818,21 @@ PG0109    | MRV               | Mineralnyye Vody Airport         | Mineralnye Vo
 ```
 
 That needs to not come up. Let's handle this.
+
+But this pair needs to appear because it's under 24 hours and the 7 of the first leg DME -> KRO should turn into a 1 when we adjust the day and 1 is a day of week for KRO -> EYK
+
+```
+PG0370    | DME               | Domodedovo International Airport | Moscow          | KRO             | Kurgan Airport                     | Kurgan       | CR2           | 08:50:00            | 11:15:00          | 02:25:00 | {2,4,7}
+ PG0367    | KRO               | Kurgan Airport                   | Kurgan          | EYK             | Beloyarskiy Airport                | Beloyarsky   | CN1           | 04:25:00            | 07:25:00          | 03:00:00 | {1,4}
+```
+
+and it does... hell yeah
+
+```
+ first_flight_no | second_flight_no | origin_airport_code | destination_airport_code | transfer_airport_code | first_scheduled_departure_time | transfer_airport_arrival_time | transfer_airport_departure_time | destination_arrival_time |  days_of_week   | total_travel_time
+-----------------+------------------+---------------------+--------------------------+-----------------------+--------------------------------+-------------------------------+---------------------------------+--------------------------+-----------------+-------------------
+ PG0012          | PG0007           | GDZ                 | JOK                      | VKO                   | 07:55:00                       | 09:40:00                      | 09:40:00                        | 11:50:00                 | {2,4,6}         | 03:55:00
+ PG0370          | PG0367           | DME                 | EYK                      | KRO                   | 08:50:00                       | 11:15:00                      | 04:25:00                        | 07:25:00                 | {1}             | 22:35:00
+ PG0300          |                  | ESL                 | SVO                      |                       | 08:20:00                       |                               |                                 | 12:10:00                 | {1,2,3,4,5,6,7} | 03:50:00
+ PG0033          |                  | ESL                 | GDZ                      |
+```
