@@ -1,4 +1,4 @@
-# Plaid technical assessment from Jeff Wan
+# Dbt practice project
 
 I wrote some docs in the `docs` folder over the course of development. The docs are mainly for me, but feel free to read them.
 - [dbt](docs/notes_dbt.md)
