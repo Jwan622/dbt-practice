@@ -5,8 +5,8 @@ Various commands to use to interact with the docker container
 
 1. to build the image:
 ```bash
-docker build -t dbt_practice .
-docker run -d dbt_practice
+docker build -t pursuit_dbt .
+docker run -d pursuit_dbt
 ```
 
 2. To see the running container and image and ports:
