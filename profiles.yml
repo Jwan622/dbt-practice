@@ -1,12 +1,12 @@
-plaid-de:
+jwan_dbt:
   outputs:
     dev:
       type: postgres
       threads: 4
       host: localhost  # This should match the Docker host, usually localhost for local development
       port: 5438       # Ensure this matches the Docker port mapping
-      user: postgres   # Same as used in your successful psql command
-      password: jwan   # Ensure this is correctly set; it was missing in the initial example
+      user: postgres
+      password: jwan_dbt
       dbname: bookings
       schema: analytics
   target: dev

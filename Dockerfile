@@ -2,4 +2,4 @@ FROM postgres:14-bullseye
 
 COPY database /docker-entrypoint-initdb.d/
 
-ENV POSTGRES_PASSWORD=jwan
+ENV POSTGRES_PASSWORD=jwan_dbt
